@@ -26,7 +26,7 @@ def clone(url, *localdir):
     if localdir:
         subdir = localdir[0]
     else:
-        subdir = os.path.basename(url)
+        subdir = os.path.basename(url) or os.path.basename(url[:-1])
     q = os.system("hg clone -U %s %s" % (url,subdir))
     if not q:
         return os.system("""

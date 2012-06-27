@@ -30,20 +30,17 @@ def clone(url, *localdir):
     q = os.system("hg clone -U %s %s" % (url,subdir))
     if not q:
         return os.system("""
-cd %s
-hg bookmark hg/default -r default
-# Do the import
-hg gexport
-# Configure the git repo and checkout
-ln -s .hg/git .git
-git branch master hg/default
-git config core.bare false
-git config core.worktree `pwd`
-git reset --hard
-# Ignore the .hg stuff
-echo '.hg' >> .git/info/exclude
+cd %s && \
+hg bookmark hg/default -r default && \
+hg gexport && \
+ln -s .hg/git .git && \
+git branch master hg/default && \
+git config core.bare false && \
+git config core.worktree `pwd` && \
+git reset --hard && \
+echo '.hg' >> .git/info/exclude && \
 echo "[ui]
-ignore = `pwd`/.hg/hgignore" >> .hg/hgrc
+ignore = `pwd`/.hg/hgignore" >> .hg/hgrc && \
 echo ".git" >> .hg/hgignore
 """ % subdir)
     return q

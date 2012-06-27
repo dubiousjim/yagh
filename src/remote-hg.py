@@ -212,7 +212,6 @@ class HgGitCheckout(object):
         with open(os.path.join(hg_repo_dir, ".hg", "hgrc"), "at") as f:
             f.write(dedent("""
             [extensions]
-            hgext.bookmarks =
             hggit = 
             """))
         self._do("hg", "bookmark", "-r", "default", "master", cwd=hg_repo_dir)

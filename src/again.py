@@ -43,7 +43,6 @@ hg gexport && \
 echo '.hg' >> .git/info/exclude && \
 git branch --track master hg/default && \
 git config core.bare false && \
-git config core.worktree `pwd` && \
 git reset --hard
 """ % subdir)
     return q

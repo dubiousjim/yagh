@@ -283,11 +283,11 @@ class GitHttpBackend(object):
         port = 8091
         while True:
             try:
-                self.server = self._make_server("localhost", port)
+                self.server = self._make_server("127.0.0.1", port)
                 break
             except socket.error:
                 port += 1
-        self.server_url = "http://localhost:%d/" % (port,)
+        self.server_url = "http://127.0.0.1:%d/" % (port,)
         self.repo_url = self.server_url + self.git_project_name
         self.server.serve_forever()
 

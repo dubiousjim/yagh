@@ -42,7 +42,7 @@ git reset --hard && \
 echo '.hg' >> .git/info/exclude && \
 echo "[ui]
 ignore = `pwd`/.hg/hgignore" >> .hg/hgrc && \
-echo ".git" >> .hg/hgignore
+echo "^\\.git" >> .hg/hgignore
 """ % subdir)
     return q
 

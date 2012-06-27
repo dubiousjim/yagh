@@ -3,7 +3,7 @@
 
 """Git-hg is a bi-directional interface to Mercurial, like git-svn, but for Hg.
 
-  git hg clone hg://blah/repository
+  git hg clone hg://blah/repository [localdir]
   git hg push
   git hg fetch
   git hg pull
@@ -21,10 +21,13 @@ import sys
 # TODO: when running a command, ensure the Hg bookmark plugin is active and
 #       installed
 
-def clone(url):
+def clone(url, *localdir):
     """This makes an hg clone and makes that appear as a Git repository."""
-    subdir = os.path.basename(url)
-    q = os.system("hg clone -U %s" % (url,))
+    if localdir:
+        subdir = localdir[0]
+    else:
+        subdir = os.path.basename(url)
+    q = os.system("hg clone -U %s %s" % (url,subdir))
     if not q:
         return os.system("""
 cd %s

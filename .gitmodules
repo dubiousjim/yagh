@@ -1,6 +1,3 @@
-[submodule "hg-git"]
-	path = hg-git
-	url = http://github.com/schacon/hg-git
 [submodule "git-hg-again"]
 	path = git-hg-again
 	url = https://github.com/abourget/git-hg-again

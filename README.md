@@ -22,10 +22,8 @@ I think these different Git-Hg bridges can work under Windows, too, but I don't 
 
 You'll need to have Git and Mercurial already installed. I'll leave that to you.
 
-Next, you'll need to install either the Hg-Git Mercurial extension, or the hg-* scripts from the fast-export project, or both. If your distribution already packages some of these, you might install them using your package manager. Or you might install the Hg-Git extension by typing `easy_install hg-git`. But you don't need to do 
- any of this manually, if you don't want to. The Makefile will try to install the needed backend components itself if it sees they aren't present.
-
-If you do install the Hg-Git Mercurial extension yourself, you may see references to including some of the following in your `~/.hgrc`:
+If you plan to use either git-hg-again or git-remote-hg, you'll need to have the Hg-Git Mercurial extension installed. Perhaps your distribution already packages this. If not, you might install it by typing `easy_install hg-git`. Or see the 
+[hg-git homepage](http://hg-git.github.com/) for more information. You may see references to including some of the following in your `~/.hgrc`:
 
     [extensions]
     hggit = 
@@ -35,17 +33,17 @@ The `bookmarks` line isn't necessary anymore; that's been built into Mercurial s
 
 Finally, type *one of* the following:
 
-    sudo gmake install git-hg-again
-    sudo gmake install git-remote-hg
-    sudo gmake install git-hg
+    sudo gmake install-git-hg-again
+    sudo gmake install-git-remote-hg
+    sudo gmake install-git-hg
 
 (If you don't like using `sudo`, I expect you'll know what to do instead.) I say `gmake` to make it clear that you need to use GNU Make. On some systems, that's only installed under the name `make`.
 
-This will install our version of the chosen system. Only one such can be installed at a time; so if you want to evaluate a different one, you'll need to:
+This will install our version of the chosen system. Only one such can be enabled at a time. If you want to evaluate a different one, just give the command to install the new one, and the previous one will automatically be disabled.
+
+If you want to uninstall all this stuff, type:
 
     sudo gmake uninstall
-
-and then `install` the new one.
 
 
 ## How do the versions distributed here differ from their upstream originals? ##
@@ -58,8 +56,6 @@ See [the git logs](https://github.com/dubiousjim/yagh/commits/master). I will in
 That depends on which tool you're using. I've tried to make the versions packaged here behave as close to each other as possible, but they're still not exactly the same.
 
 TODO: Fill in more details...
-
-TODO: Supply Makefile
 
 
 

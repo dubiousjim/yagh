@@ -33,16 +33,16 @@ def clone(url, *localdir):
 cd %s && \
 hg update && \
 hg bookmark hg/default -r default && \
-hg gexport && \
+echo "^\\.git" >> .hg/hgignore && \
 ln -s .hg/git .git && \
+echo "[ui]
+ignore = .hg/hgignore" >> .hg/hgrc && \
+hg gexport && \
+echo '.hg' >> .git/info/exclude && \
 git branch master hg/default && \
 git config core.bare false && \
 git config core.worktree `pwd` && \
-git reset --hard && \
-echo '.hg' >> .git/info/exclude && \
-echo "[ui]
-ignore = .hg/hgignore" >> .hg/hgrc && \
-echo "^\\.git" >> .hg/hgignore
+git reset --hard
 """ % subdir)
     return q
 

@@ -1,0 +1,207 @@
+#!/usr/bin/env bash
+
+if which python2 >&/dev/null; then
+    PYTHON=python2
+    export PYTHON
+fi
+
+set -e
+
+# Try to use GNU Coreutils readlink --canonicalize if available,
+# falling back to less robust shell script only if not found.
+if which greadlink >&/dev/null; then
+    canon="greadlink --canonicalize"
+elif readlink --canonicalize / >&/dev/null; then
+    canon="readlink --canonicalize"
+else
+    canon=canonicalize
+fi
+
+function canonicalize {
+    path="$1"
+    
+    while [[ -L "$path" ]]; do
+	dir=$(dirname "$path")
+	path=$(ls -l "$path" | sed -e 's/.* -> //')
+	cd "$dir"
+    done
+    
+    dir=$(dirname "$path")
+    file=$(basename "$path")
+    if [[ ! -d "$dir" ]]; then
+	echo "canonize: $dir: No such directory" >&2
+	exit 1
+    fi
+    cdir=$(cd "$dir" && pwd -P)
+    printf "%s/%s\n" "$cdir" "$file"
+}
+
+function git-current-branch {
+    local ref
+    ref=$(git symbolic-ref -q HEAD) && echo "${ref#refs/heads/}"
+}
+
+function check-hg-fast-export {
+    # Search for hg-fast-export $PATH, use if available, if not fall back
+    # to looking around for it in sibling directory of bin directory of
+    # the current exeuctable, possibly tracing back along symbolic link.
+    if type hg-fast-export > /dev/null 2>&1 ; then
+	HG_FAST_EXPORT=hg-fast-export
+    else
+	GITHG_HOME=$($canon "$(dirname "$($canon "$0")")/..")
+	HG_FAST_EXPORT=$GITHG_HOME/fast-export/hg-fast-export.sh
+	if ! type "$HG_FAST_EXPORT" > /dev/null 2>&1 ; then
+	    echo "error: executable not found, $HG_FAST_EXPORT"
+	    echo 'Possible fixes: run "git submodule update --init" in git-hg repo, or'
+	    echo 'install hg-fast-export executable in directory on $PATH.'
+	    exit 1
+	fi
+    fi
+}
+
+function git-hg-clone {
+    check-hg-fast-export
+    
+    if [[ $1 == "--force" ]]; then
+        FORCE="--force"
+        shift
+    fi
+    HG_REMOTE=$1
+    
+    if [[ $# -lt 2 ]]; then
+        CHECKOUT=$(basename "${1%#*}")
+    else
+        CHECKOUT=$2
+    fi
+    if [[ -a $CHECKOUT ]]; then
+	echo "error: $CHECKOUT exists"
+	exit 1
+    fi
+    git init "$CHECKOUT"
+    hg clone -U "$HG_REMOTE" "$CHECKOUT/.git/hgcheckout"
+    (
+	cd "$CHECKOUT"
+	git init --bare .git/hgremote
+	(
+	    cd .git/hgremote
+	    "$HG_FAST_EXPORT" -r ../hgcheckout $FORCE
+	)
+	git remote add hg .git/hgremote
+	git fetch hg
+        if git rev-parse --verify -q remotes/hg/master > /dev/null; then
+	    local branch="master"
+        else
+            local branch=$(cd .git/hgcheckout/ && hg tip | grep branch | awk '{print $2}')
+        fi
+        git config hg.tracking.master "$branch"
+        git pull hg "$branch"
+    )
+}
+
+function git-hg-fetch {
+    check-hg-fast-export
+    if [[ $1 == "--force" ]]; then
+        FORCE="--force"
+        shift
+    fi
+    hg -R .git/hgcheckout pull
+    (
+	cd .git/hgremote
+	"$HG_FAST_EXPORT" $FORCE
+    )
+    git fetch hg
+}
+
+function git-hg-pull {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+        --rebase)
+            REBASE="--rebase"
+            ;;
+        --force)
+            FORCE="--force"
+            ;;
+        esac
+	shift
+    done
+
+    git-hg-fetch $FORCE
+
+    local current_branch remote_branch
+
+    if ! current_branch=$(git-current-branch); then
+	    echo "ERROR: You are not currently on a branch."
+	    exit 1
+    fi
+
+    if [[ $current_branch == "master" ]]; then
+        remote_branch=$(git config hg.tracking.master || true)
+        
+        if [[ -z $remote_branch ]]; then
+            if git rev-parse --verify -q remotes/hg/master > /dev/null; then
+                remote_branch="master"
+                git config hg.tracking.master master
+            else
+                echo "ERROR: Cannot determine remote branch. There is no remote branch called master, and hg.tracking.master not set. Merge the desired branch manually."
+                exit 1
+            fi
+        fi
+    else
+        remote_branch=$(git config "hg.tracking.$current_branch" || true)
+        if [[ -z $remote_branch ]]; then
+             echo "ERROR: Cannot determine the remote branch to pull from. Run git merge manually against the desired remote branch."
+             echo "Alternatively, set hg.tracking.$current_branch to the name of the branch in hg the current branch should track"
+             exit 1
+        fi
+    fi
+
+    if [[ "$REBASE" == "--rebase" ]]; then
+        git rebase "hg/$remote_branch"
+    else
+        git merge "hg/$remote_branch"
+    fi
+}
+
+function git-hg-checkout {
+    if [[ $1 == "--force" ]]; then
+        FORCE="--force"
+        shift
+    fi
+    git-hg-fetch $FORCE
+    git checkout "hg/$1" -b "$1"
+}
+
+function git-hg-push {
+    HG_REPO=$1
+    hg --config extensions.convert= convert . .git/hgcheckout
+    hg -R .git/hgcheckout push "$HG_REPO"
+}
+
+function usage {
+    echo "To clone a mercurial repo run:"
+    echo "  clone <path/to/mercurial/repo> [local_checkout_path]"
+    echo ""
+    echo " if that fails (due to unnamed heads) try:"
+    echo "  git-hg clone --force <path/to/mercurial/repo> [local_checkout_path]"
+    echo ""
+    echo "To work with a cloned mercurial repo use: "
+    echo "  fetch [ --force ]                   fetch latest branches from mercurial"
+    echo "  pull [ --force ] [ --rebase ]       fetch and merge (or rebase) into the"
+    echo "                                      current branch"
+    echo "  push [destination]                  push latest changes to mercurial"
+    echo "  checkout [ --force ] branch_name    checkout a mercurial branch"
+}
+
+FORCE=
+REBASE=
+CMD=$1
+shift
+case "$CMD" in
+    clone|fetch|pull|checkout|push)
+	git-hg-$CMD "$@"
+	;;
+    *)
+	usage
+	exit 1
+	;;
+esac

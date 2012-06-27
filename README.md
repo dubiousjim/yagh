@@ -16,8 +16,7 @@ I wasn't sure which of these strategies would work best, so I tried out all thre
 I saw some ways to usefully tweak the different frontends---in some cases, these tweaks were necessary to get them to run on the FreeBSD machine I'm using right now---and I also thought it'd help evaluate them to tweak them to make their behind-the-scenes layout more like each other's. This github repo holds the results. I've also included a Makefile that will let you install any of the three. I encourage you to try them out and decide for yourself what works best. I'll be glad to hear about cases where these tools break. Until I've definitively made up my mind which of these tools to use, I'll try to keep them in synch with upstream changes.
 
 
-Installation
-------------
+## Installation ##
 
 I think these different Git-Hg bridges can work under Windows, too, but I don't know much about that, and will continue on the assumption you're trying to install to some Unix-like system.
 
@@ -49,14 +48,12 @@ This will install our version of the chosen system. Only one such can be install
 and then `install` the new one.
 
 
-How do the versions distributed here differ from their upstream originals?
---------------------------------------------------------------------------
+## How do the versions distributed here differ from their upstream originals? ##
 
 See [the git logs](https://github.com/dubiousjim/yagh/commits/master). I will also suggest various of these changes to the upstream authors, and will try to keep track of those and other changes they make.
 
 
-How do I use these tools?
--------------------------
+## How do I use these tools? ##
 
 That depends on which tool you're using. I've tried to make the versions packaged here behave as close to each other as possible, but they're still not exactly the same.
 
@@ -66,8 +63,7 @@ TODO: Supply Makefile
 
 
 
-Mercurial for Git Users
------------------------
+## Mercurial for Git Users ##
 
 Here are some useful comparisons/translation manuals between Git and Mercurial, in some cases targetted at users who already know Git:
 

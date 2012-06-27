@@ -10,7 +10,7 @@
 
 
 Refs:
-  Isn't bi-directional: https://github.com/offbytwo/git-hg
+  Bi-directional support is less robust: https://github.com/offbytwo/git-hg
   Hard to remember: http://traviscline.com/blog/2010/04/27/using-hg-git-to-work-in-git-and-push-to-hg/
 
 """

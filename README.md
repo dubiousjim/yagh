@@ -13,7 +13,7 @@ As I posted in [this Stack Overflow question](http://stackoverflow.com/a/1117869
 
 I wasn't sure which of these strategies would work best, so I tried out all three. None of them are naive-user-friendly, but they're not that complicated either once you take the time to study them. The different backend engines (the hg-git Mercurial extension, the git-remote-XXX protocol, and the hg-fast-export script) are doing the heavy lifting; these are just different frontends for them.
 
-I saw some ways to usefully tweak the different frontends---in some cases, these tweaks were necessary to get them to run on the FreeBSD machine I'm using right now---and I also thought it'd help evaluate them to tweak them to make their behind-the-scenes layout more like each other's. This github repo holds the results. I've also included a Makefile that will let you install any of the three. I encourage you to try them out and decide for yourself what works best. I'll be glad to hear about cases where these tools break. Until I've definitively made up my mind which of these tools to use, I'll try to keep them in synch with upstream changes.
+I saw some ways to usefully tweak the different frontends---in some cases, these tweaks were necessary to get them to run on the FreeBSD machine I'm using right now---and I also thought it'd help evaluate them to tweak them to make their behind-the-scenes layout more like each other's. This github repo holds the results. I've also included a Makefile that will let you install any of the three. I encourage you to try them out and decide for yourself what works best.
 
 
 ## Installation ##

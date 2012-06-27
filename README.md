@@ -9,7 +9,7 @@ As I posted in [this Stack Overflow question](http://stackoverflow.com/a/1117869
 
   2. [git-remote-hg](https://github.com/rfk/git-remote-hg) also uses hg-git, and additionally makes use of the git-remote-XXX protocols. This method uses the toplevel directory only as a Git working directory. Its Mercurial repository is instead kept bare; and there is an additional bare Git repository used to make synching between Git and Mercurial safer and more idiomatically gitlike.
 
-  3. [git-hg](https://github.com/cosmin/git-hg) (formerly published [here](https://github.com/offbytwo/git-hg)) is a wrapper for the hg-fast-export script from the fast-export project. Like method 2, this also keeps a bare Mercurial repository and an additional bare Git repository. Some commentary discusses this tool as being hg->git only, but it has had bidirectional support now for a while. As we'll discuss below, though, I've found the bidirectional support from the other methods to be better aligned with how I was expecting these tools to work.
+  3. [git-hg](https://github.com/cosmin/git-hg) (formerly maintained [here](https://github.com/offbytwo/git-hg)) is a wrapper for the hg-fast-export script from the fast-export project. Like method 2, this also keeps a bare Mercurial repository and an additional bare Git repository. Some commentary discusses this tool as being hg->git only, but it has had bidirectional support now for a while. As we'll discuss below, though, I've found the bidirectional support from the other methods to be better aligned with how I was expecting these tools to work.
 
 I wasn't sure which of these strategies would work best, so I tried out all three. None of them are naive-user-friendly, but they're not that complicated either once you take the time to study them. The different backend engines (the hg-git Mercurial extension, the git-remote-XXX protocol, and the hg-fast-export script) are doing the heavy lifting; these are just different frontends for them.
 
@@ -51,7 +51,7 @@ and then `install` the new one.
 How do the versions distributed here differ from their upstream originals?
 --------------------------------------------------------------------------
 
-See the git logs. I will also suggest various of these changes to the upstream authors, and will try to keep track of those and other changes they make.
+See [the git logs](https://github.com/dubiousjim/yagh/commits/master). I will also suggest various of these changes to the upstream authors, and will try to keep track of those and other changes they make.
 
 
 How do I use these tools?

@@ -1,0 +1,15 @@
+[submodule "hg-git"]
+	path = hg-git
+	url = http://github.com/schacon/hg-git
+[submodule "git-hg-again"]
+	path = git-hg-again
+	url = https://github.com/abourget/git-hg-again
+[submodule "git-remote-hg"]
+	path = git-remote-hg
+	url = https://github.com/rfk/git-remote-hg.git
+[submodule "git-hg"]
+	path = git-hg
+	url = https://github.com/cosmin/git-hg.git
+[submodule "fast-export"]
+	path = fast-export
+	url = http://repo.or.cz/r/fast-export.git

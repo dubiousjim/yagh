@@ -31,6 +31,7 @@ def clone(url, *localdir):
     if not q:
         return os.system("""
 cd %s && \
+hg update && \
 hg bookmark hg/default -r default && \
 hg gexport && \
 ln -s .hg/git .git && \

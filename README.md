@@ -50,7 +50,7 @@ and then `install` the new one.
 
 ## How do the versions distributed here differ from their upstream originals? ##
 
-See [the git logs](https://github.com/dubiousjim/yagh/commits/master). I will also suggest various of these changes to the upstream authors, and will try to keep track of those and other changes they make.
+See [the git logs](https://github.com/dubiousjim/yagh/commits/master). I will inform the upstream authors of the changes that seemed useful, and will try to keep track of other changes they make to the originals. I'll be glad to hear about cases where any of these tools break.
 
 
 ## How do I use these tools? ##

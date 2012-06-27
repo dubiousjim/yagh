@@ -33,9 +33,9 @@ The `bookmarks` line isn't necessary anymore; that's been built into Mercurial s
 
 Finally, type *one of* the following:
 
-    sudo gmake install-git-hg-again
-    sudo gmake install-git-remote-hg
-    sudo gmake install-git-hg
+    gmake && sudo gmake install-git-hg-again
+    gmake && sudo gmake install-git-remote-hg
+    gmake && sudo gmake install-git-hg
 
 (If you don't like using `sudo`, I expect you'll know what to do instead.) I say `gmake` to make it clear that you need to use GNU Make. On some systems, that's only installed under the name `make`.
 

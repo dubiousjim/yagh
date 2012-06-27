@@ -6,7 +6,9 @@ INSTALL=/usr/bin/install -c
 LN=/bin/ln
 RM=/bin/rm
 
-all:
+FAST_EXPORT=fast-export/hg-fast-export.sh fast-export/hg-fast-export.py fast-export/hg2git.py
+
+all: $(FAST_EXPORT)
 
 $(FAST_EXPORT):
 	git submodule update --init

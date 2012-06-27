@@ -29,7 +29,7 @@ def clone(url, *localdir):
         subdir = os.path.basename(url) or os.path.basename(url[:-1])
     q = os.system("hg clone -U %s %s" % (url,subdir))
     if not q:
-        return os.system("""
+        q = os.system("""
 cd %s && \
 hg update && \
 hg bookmark hg/default -r default && \
@@ -76,7 +76,7 @@ def fetch():
     if not q:
         q = os.system("hg bookmark -f hg/default -r default")
         if not q:
-            return os.system("hg gexport")
+            q = os.system("hg gexport")
     return q
 
 def pull():
@@ -87,7 +87,7 @@ def pull():
     """
     q = fetch()
     if not q:
-        return os.system("git merge hg/default")
+        q = os.system("git merge hg/default")
     return q
 
 

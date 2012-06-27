@@ -81,7 +81,8 @@ Here are some useful comparisons/translation manuals between Git and Mercurial, 
   * [Git vs Mercurial](http://www.wikivs.com/wiki/Git_vs_Mercurial)
 
 
--- 
-Dubiousjim
-dubiousjim@gmail.com
-https://github.com/dubiousjim
+--  
+Dubiousjim  
+dubiousjim@gmail.com  
+https://github.com/dubiousjim  
+

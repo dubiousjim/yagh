@@ -59,7 +59,7 @@ def push():
         if not q:
             q = os.system("hg gexport")
     if not q:
-        res = raw_input("Import Git commits into Hg local repo. Push back to the Hg remote ?")
+        res = raw_input("Import Git commits into Hg local repo. Push back to the Hg remote? ")
         if res.lower() in ('y', 'yes', '1', 'true'):
             q = os.system("hg push")
     return q

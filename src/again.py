@@ -24,8 +24,9 @@ import sys
 def clone(url):
     """This makes an hg clone and makes that appear as a Git repository."""
     subdir = os.path.basename(url)
-    os.system("hg clone -U %s" % (url,))
-    os.system("""
+    q = os.system("hg clone -U %s" % (url,))
+    if not q:
+        return os.system("""
 cd %s
 hg bookmark hg/default -r default
 # Do the import
@@ -42,6 +43,7 @@ echo "[ui]
 ignore = `pwd`/.hg/hgignore" >> .hg/hgrc
 echo ".git" >> .hg/hgignore
 """ % subdir)
+    return q
 
 def push():
     """Pushes back to the Hg repository.
@@ -49,11 +51,14 @@ def push():
     Like ``git push``, but up to the remote Mercurial repo.
 
     """
-    os.system("hg gimport")
-    res = raw_input("Import Git commits into Hg local repo. Push back to the Hg remote ?")
-    if res.lower() in ('y', 'yes', '1', 'true'):
-        os.system("hg push")
-        os.system("hg bookmark -f hg/default -r default")
+    q = os.system("hg gimport")
+    if not q:
+        res = raw_input("Import Git commits into Hg local repo. Push back to the Hg remote ?")
+        if res.lower() in ('y', 'yes', '1', 'true'):
+            q = os.system("hg push")
+            if not q:
+                return os.system("hg bookmark -f hg/default -r default")
+    return q
 
 def fetch():
     """Update the local branches with what is up on the remote Mercurial repo.
@@ -63,9 +68,12 @@ def fetch():
     This updates the Git branches to point to the Mercurial ones.
 
     """
-    os.system("hg pull")
-    os.system("hg bookmark -f hg/default -r default")
-    os.system("hg gexport")
+    q = os.system("hg pull")
+    if not q:
+        q = os.system("hg bookmark -f hg/default -r default")
+        if not q:
+            return os.system("hg gexport")
+    return q
 
 def pull():
     """Fetch and merge the remote changes to the Hg repo.
@@ -73,8 +81,10 @@ def pull():
     Equivalent to ``git pull`` in Git.
 
     """
-    fetch()
-    os.system("git merge hg/default")
+    q = fetch()
+    if not q:
+        return os.system("git merge hg/default")
+    return q
 
 
 if __name__ == '__main__':

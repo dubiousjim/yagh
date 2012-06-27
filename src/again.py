@@ -55,11 +55,13 @@ def push():
     """
     q = os.system("hg gimport")
     if not q:
+        q = os.system("hg bookmark -f hg/default -r default")
+        if not q:
+            q = os.system("hg gexport")
+    if not q:
         res = raw_input("Import Git commits into Hg local repo. Push back to the Hg remote ?")
         if res.lower() in ('y', 'yes', '1', 'true'):
             q = os.system("hg push")
-            if not q:
-                return os.system("hg bookmark -f hg/default -r default")
     return q
 
 def fetch():

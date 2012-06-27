@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+
 """
 
 git_remote_hg:  access hg repositories as git remotes
@@ -296,3 +299,10 @@ class GitHttpBackend(object):
         self.server.shutdown()
 
 
+if __name__ == "__main__":
+    import sys
+    try:
+        res = main()
+    except KeyboardInterrupt:
+        res = 1
+    sys.exit(res)

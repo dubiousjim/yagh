@@ -49,11 +49,12 @@ git-current-branch () {
 check-hg-fast-export () {
     # Search for hg-fast-export $PATH, use if available, if not fall back
     # to looking around for it in sibling directory of bin directory of
-    # the current exeuctable, possibly tracing back along symbolic link.
+    # the current executable, possibly tracing back along symbolic link.
     if type hg-fast-export >/dev/null 2>&1; then
 	HG_FAST_EXPORT=hg-fast-export
     else
-	GITHG_HOME=$($canon "$(dirname "$($canon "$0")")/..")
+	GITHG_HOME=$(dirname "$($canon "$0")")
+        GITHG_HOME=$($canon "$GITHG_HOME/..")
 	HG_FAST_EXPORT=$GITHG_HOME/fast-export/hg-fast-export.sh
 	if ! type "$HG_FAST_EXPORT" >/dev/null 2>&1; then
 	    echo "error: executable not found, $HG_FAST_EXPORT"

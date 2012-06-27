@@ -36,11 +36,12 @@ hg bookmark hg/default -r default && \
 echo "^\\.git" >> .hg/hgignore && \
 echo "[git]
 intree = true
+exportbranch = refs/head/hg/default
 [ui]
 ignore = .hg/hgignore" >> .hg/hgrc && \
 hg gexport && \
 echo '.hg' >> .git/info/exclude && \
-git branch master hg/default && \
+git branch --track master hg/default && \
 git config core.bare false && \
 git config core.worktree `pwd` && \
 git reset --hard

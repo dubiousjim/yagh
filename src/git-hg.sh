@@ -11,29 +11,34 @@ set -e
 # falling back to less robust shell script only if not found.
 if which greadlink >/dev/null 2>&1; then
     canon="greadlink --canonicalize"
-elif readlink --canonicalize / >/dev/null 2>&1; then
-    canon="readlink --canonicalize"
+elif readlink -f / >/dev/null 2>&1; then
+    canon="readlink -f"
+elif which realpath >/dev/null 2>&1; then
+    canon="realpath"
 else
     canon=canonicalize
 fi
 
+# shell implementation of `readlink -f $1`
+# changes current directory
 canonicalize () {
+    local path dir file
     path="$1"
     
     while [ -L "$path" ]; do
 	dir=$(dirname "$path")
-	path=$(ls -l "$path" | sed -e 's/.* -> //')
+        path=${$(ls -l "$path")#* -> }
 	cd "$dir"
     done
     
     dir=$(dirname "$path")
     file=$(basename "$path")
     if [ ! -d "$dir" ]; then
-	echo "canonize: $dir: No such directory" >&2
+	echo "canonicalize: $dir: No such directory" >&2
 	exit 1
     fi
-    cdir=$(cd "$dir" && pwd -P)
-    printf "%s/%s\n" "$cdir" "$file"
+    dir=$(cd "$dir" && pwd -P)
+    printf "%s/%s\n" "$dir" "$file"
 }
 
 git-current-branch () {

@@ -36,21 +36,21 @@ them together to make it all work a little easier.
 For each remote mercurial repository, you actually get *two* additional
 repositories hidden inside your local git repo:
 
-    * .git/hgremotes/[URL]:           a local hg clone of the remote repo
-    * .git/hgremotes/[URL]/.hg/git:   a bare git repo managed by hg-git
+    * .git/hgcheckout:   a local hg clone of the remote repo
+    * .git/hgremote:     a bare git repo managed by hg-git
 
 When you "git push" from your local git repo into the remote mercurial repo,
 here is what git-remote-hg will do for you:
 
-    * use git-remote-http to push into .git/hgremotes/[URL]/.hg/git
-    * call "hg gimport" to import changes into .git/hgremotes/[URL]
+    * use git-remote-http to push into .git/hgremote
+    * call "hg gimport" to import changes into .git/hgcheckout
     * call "hg push" to push them up to the remote repo
 
 Likewise, when you "git pull" from the remote mercurial repo into your local
 git repo, here is what happens under the hood:
 
     * call "hg pull" to pull changes from the remote repo
-    * call "hg gexport" to export them into .git/hgremotes/[URL]/.hg/git
+    * call "hg gexport" to export them into .git/hgremote
     * use git-remote-http to pull them into your local repo
 
 Ugly?  Sure.  Hacky?  You bet.  But it seems to work remarkably well.
@@ -99,7 +99,7 @@ def main(argv=None, git_dir=None):
     will communicate with a remote mercurial repository.  It basically does
     the following:
 
-        * ensure there's a local hg checkout in .git/hgremotes/[URL]
+        * ensure there's a local hg checkout in .git/hgcheckout
         * ensure that it has a matching hg-git repo for import/export
         * update the hg-git repo from the remote mercurial repo
         * start a background thread running git-http-backend to communicate
@@ -167,10 +167,10 @@ class HgGitCheckout(object):
     def __init__(self, git_dir, hg_url):
         self.hg_url = hg_url
         self.hg_name = hg_name = urllib.quote(hg_url, safe="")
-        self.hg_repo_dir = os.path.join(git_dir, "hgremotes", hg_name)
+        self.hg_repo_dir = os.path.join(git_dir, "hgcheckout")
+        self.git_repo_dir = os.path.join(git_dir, "hgremote")
         if not os.path.exists(self.hg_repo_dir):
             self.initialize_hg_repo()
-        self.git_repo_dir = os.path.join(self.hg_repo_dir, ".hg", "git")
 
     def _do(self, *cmd, **kwds):
         """Run a hg command, capturing and reporting output."""
@@ -217,6 +217,9 @@ class HgGitCheckout(object):
             """))
         self._do("hg", "bookmark", "-r", "default", "master", cwd=hg_repo_dir)
         self._do("hg", "gexport", cwd=hg_repo_dir)
+        git_dir = os.path.join(self.hg_repo_dir, ".hg", "git")
+        os.rename(git_dir, self.git_repo_dir)
+        os.symlink(self.git_repo_dir, git_dir)
 
 
 class SilentWSGIRequestHandler(wsgiref.simple_server.WSGIRequestHandler):

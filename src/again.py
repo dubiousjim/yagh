@@ -34,8 +34,9 @@ cd %s && \
 hg update && \
 hg bookmark hg/default -r default && \
 echo "^\\.git" >> .hg/hgignore && \
-ln -s .hg/git .git && \
-echo "[ui]
+echo "[git]
+intree = true
+[ui]
 ignore = .hg/hgignore" >> .hg/hgrc && \
 hg gexport && \
 echo '.hg' >> .git/info/exclude && \

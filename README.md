@@ -1,19 +1,26 @@
-yagh: bi-directional Git to Mercurial interfaces
-================================================
+yagh: Yet Another set of Git to Hg interfaces
+=============================================
 
-I was looking at the state of play in Git-Hg bridges. I've gotten used to Git, and hoped to be able to at least read, but preferably also push to, Mercurial repos while using mostly Git idioms.
+I want to use Git to interact with upstream Mercurial repositories. Surely I thought someone else must have already hashed this out. So I looked into what tools were available.
 
-As I posted in [this Stack Overflow question](http://stackoverflow.com/a/11178693/272427), I found three approaches to this problem that looked lightweight and initially appealing. Two of the approaches rely on the [**hg-git extension**](http://hg-git.github.com/) for Mercurial; the other approach relies on hg-fast-export from the [**fast-export project**](http://repo.or.cz/w/fast-export.git). Here they are (not in order of when they first appeared):
+As I posted in [this Stack Overflow question](http://stackoverflow.com/a/11178693/272427), I found three approaches to this that looked lightweight and initially appealing. Two of the approaches rely on the [**hg-git extension**](http://hg-git.github.com/) for Mercurial; the other approach relies on `hg-fast-export` from the [**fast-export project**](http://repo.or.cz/w/fast-export.git). Here they are (not in order of when they first appeared):
 
-  1. [git-hg-again](https://github.com/abourget/git-hg-again) uses hg-git and is inspired by a [2010 blog post by Travis Cline](http://traviscline.com/blog/2010/04/27/using-hg-git-to-work-in-git-and-push-to-hg/). This method uses the toplevel directory as a working directory for both Mercurial and Git at the same time. It creates a Mercurial bookmark "default" that tracks the "default" named branch, and updates a local Git branch from that bookmark. 
 
-  2. [git-remote-hg](https://github.com/rfk/git-remote-hg) also uses hg-git, and additionally makes use of the git-remote-XXX protocols. This method uses the toplevel directory only for a Git working directory; it keeps its Mercurial repository bare. It also maintains a second bare Git repository to make synching between Git and Mercurial safer and more idiomatically gitlike.
+  1. [git-hg-again](https://github.com/abourget/git-hg-again) uses `hg-git` and is inspired by a [2010 blog post by Travis Cline](http://traviscline.com/blog/2010/04/27/using-hg-git-to-work-in-git-and-push-to-hg/). This method uses the toplevel directory as a working directory for both Mercurial and Git at the same time. It creates a Mercurial bookmark that it keeps in synch with the tip of the `default` (unnamed) branch in the Mercurial repository; and it updates a local Git branch from that bookmark. 
 
-  3. The [git-hg](https://github.com/cosmin/git-hg) script (formerly maintained [here](https://github.com/offbytwo/git-hg)) uses hg-fast-export. Like method 2, this also keeps a bare Mercurial repository and an additional bare Git repository. Some commentary discusses this tool as being hg->git only, but it has had bidirectional support now for a while. As we'll discuss below, though, I've found the bidirectional support from the other methods to be better aligned with how I was expecting these tools to work.
+  2. [git-remote-hg](https://github.com/rfk/git-remote-hg) also uses `hg-git`, and additionally makes use of the `git-remote-helpers` protocol. This method uses the toplevel directory only for a Git working directory; it keeps its Mercurial repository bare. It also maintains a second bare Git repository to make synching between Git and Mercurial safer and more idiomatically Gitlike.
 
-I wasn't sure which of these strategies would work best, so I tried out all three. None of them are naive-user-friendly, but they're not that complicated either once you take the time to study them. The different backend engines (the hg-git Mercurial extension, the git-remote-XXX protocol, and the hg-fast-export script) are doing the heavy lifting; these are just different frontends for them.
+  3. The [git-hg](https://github.com/cosmin/git-hg) script (formerly maintained [here](https://github.com/offbytwo/git-hg)) uses hg-fast-export. Like method 2, this also keeps a bare Mercurial repository and an additional bare Git repository. Some commentary discusses this tool as being hg->git only, but it claims to have merged in git->hg push support on 7 Dec 2011. As we'll discuss below, though, the way this tool tries to implement push support doesn't seem to be workable. On the pull side, it ignores Mercurial bookmarks and instead imports every named Mercurial branch into a Git branch, and the `default` (unnamed) Mercurial branch into `master`.
 
-I saw some ways to usefully tweak the different frontends---in some cases, these tweaks were necessary to get them to run on the FreeBSD machine I'm using right now---and I also thought it'd help evaluate them to tweak them to make their behind-the-scenes layout more like each other's. This github repo holds the results. I've also included a Makefile that will let you install any of the three. I encourage you to try them out and decide for yourself what works best.
+*Don't confuse `hg-git` with `git-hg`!* The first is a Mercurial extension that's a backend to some of these tools, the second is a frontend script that doesn't make any use of the first.
+
+I wasn't sure which of these tools would work best, so I tried out all three. None of them are yet packaged or documented in a friendly way, but they're not complicated either. The underlying machinery they make use of (the `hg-git` extension, the `git-remote-helpers` protocol, and the `hg-fast-export` script) are what do the heavy lifting.
+
+I saw some ways to usefully tweak the different frontends---in some cases, these tweaks were necessary to get them to run on the FreeBSD machine I'm currently using---and I also thought it'd help evaluate them to tweak them to make their behind-the-scenes layout more like each other's. This github repo holds the results. I also included a Makefile that will let you install any of the three. I encourage you to try them out and decide for yourself what works best.
+
+Details on installing and using (the yagh versions of) these tools are below.
+
+You might also like to read the accompanying Evaluation.md page, which gives the different backend and frontend choices a work-out and figures out what works best.
 
 
 ## Installation ##
@@ -51,30 +58,12 @@ If you want to uninstall all this stuff, type:
 See [the git logs](https://github.com/dubiousjim/yagh/commits/master). I will inform the upstream authors of the changes that seemed useful, and will try to keep track of other changes they make to the originals. I'll be glad to hear about cases where any of these tools break.
 
 
-## How do I use these tools? ##
+## How does one use these tools? How do they work? ##
 
 That depends on which tool you're using. I've tried to make the versions packaged here behave as close to each other as possible, but they're still not exactly the same.
 
-TODO: Fill in more details...
+*Note that these instructions apply to these tools as configured in yagh, which differ in several ways from how the original authors distribute the tools.*
 
 
-
-## Mercurial for Git Users ##
-
-Here are some useful comparisons/translation manuals between Git and Mercurial, in some cases targetted at users who already know Git:
-
-  * [Mercurial for Git users](http://mercurial.selenic.com/wiki/GitConcepts)
-  * [Git and Mercurial - Compare and Contrast](http://stackoverflow.com/questions/1598759/git-and-mercurial-compare-and-contrast)
-  * [What is the difference between Mercurial and Git](http://stackoverflow.com/questions/35837/what-is-the-difference-between-mercurial-and-git)
-  * [Mercurial and Git: a technical comparison](http://alblue.bandlem.com/2011/03/mercurial-and-git-technical-comparison.html)
-  * [Git hg rosetta stone](https://github.com/sympy/sympy/wiki/Git-hg-rosetta-stone)
-  * [Homebrew Coding: Mercurial](http://quirkygba.blogspot.com/2009/04/mercurial.html)
-  * [Francisoud's Blog: Git vs Mercurial (hg)](http://francisoud.blogspot.com/2010/07/git-vs-mercurial.html)
-  * [Git vs Mercurial](http://www.wikivs.com/wiki/Git_vs_Mercurial)
-
-
---  
-Dubiousjim  
-dubiousjim@gmail.com  
-https://github.com/dubiousjim  
+WORKING ON THESE INSTRUCTIONS...
 

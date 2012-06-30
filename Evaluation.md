@@ -1290,7 +1290,11 @@ Here is [the relevant part of the `hg-git` documentation](http://mercurial.selen
 
     hg gexport
 
-    This will create a .git repository in the working directory (alongside the .hg directory) that you can interact with like any regular git repository. If you have made commits in the git repository and want to convert them to hg commits, first make sure the changes you want are on the master branch, then do:
+    This will create a .git repository in the working directory (alongside the
+    .hg directory) that you can interact with like any regular git repository. If
+    you have made commits in the git repository and want to convert them to hg
+    commits, first make sure the changes you want are on the master branch, then
+    do:
 
     hg gimport
 
@@ -1302,7 +1306,9 @@ Here is [the relevant part of the `hg-git` documentation](http://mercurial.selen
     intree=1
     exportbranch=refs/heads/from-hg
 
-    This will cause 'hg gexport' to update the 'from-hg' branch, instead of the master branch, so that your changes will not be lost even if you work on the master branch.
+    This will cause 'hg gexport' to update the 'from-hg' branch, instead of the
+    master branch, so that your changes will not be lost even if you work on the
+    master branch.
 
 
 I went through all of the steps from the preceding section with yagh-test5, yagh-test4, and so on, substituting `hg gexport` for `hg push` and `hg gimport` for `hg pull`. Here is what the `.hg/hgrc` file I used:

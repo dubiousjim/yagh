@@ -14,7 +14,7 @@ As I describe [at Stack Overflow](http://stackoverflow.com/a/11178693/272427), I
 
     For pulling, this tool ignores Mercurial bookmarks and instead imports every named Mercurial branch into a Git branch, and the `default` (unnamed) Mercurial branch into `master`.
 
-    Some commentary discusses this tool as being hg->git only, but it claims to have merged in git->hg push support on 7 Dec 2011. As I discuss on the Evaluation page, though, the way this tool tries to implement push support doesn't seem to be workable.
+    Some commentary discusses this tool as being hg->git only, but it claims to have merged in git->hg push support on 7 Dec 2011. As I discuss on the Backends page, though, the way this tool tries to implement push support doesn't seem to be workable.
 
 
 *Don't confuse `hg-git` with `git-hg`!* The first is a Mercurial extension that's a backend to some of these tools, the second is a frontend script that doesn't make any use of the first.
@@ -25,7 +25,7 @@ I saw some ways to usefully tweak the different frontends---in some cases, these
 
 Details on installing and using (the yagh versions of) these tools are below.
 
-You might also like to read the accompanying [Evaluation page](https://github.com/dubiousjim/yagh/blob/master/Evaluation.md), which gives the different backend and frontend choices a work-out and figures out what works best.
+You might also like to read the accompanying [Backends page](https://github.com/dubiousjim/yagh/blob/master/Backends.md), which gives the different backend choices a work-out and figures out what works best. The [Frontends page](https://github.com/dubiousjim/yagh/blob/master/Frontends.md) then discuss the design choices behind why these frontends work as they do here.
 
 
 ## Installation ##

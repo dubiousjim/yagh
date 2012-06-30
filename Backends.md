@@ -1,8 +1,8 @@
-Evaluation
-==========
+Evaluating the Backends
+=======================
 
-The Backend Candidates
-----------------------
+The Candidates
+--------------
 
 As mentioned in the README, there are a couple of different backend methods one can use to drive a Git/Hg bridge, and then some additional choices one can make about packaging those backends for day-to-day use. (In git-speak, what "porcelain" to install on top of them.)
 
@@ -1336,8 +1336,5 @@ Summary
 
 OK, so the `hg-git` extension seems to work pretty well. We just have to make sure we have bookmarks tracking all of the heads on the Mercurial side that we want to push or export to Git. At this point in time, there doesn't seem to be much difference in functionality between `hg push`ing and `hg gexport`ing.
 
+For more discussion about how to  best fit a nice frontend porcelain onto the `hg-git` extension, see the accompanying [Frontends page](https://github.com/dubiousjim/yagh/blob/master/Frontends.md).
 
-Designing a nice frontend
--------------------------
-
-TODO

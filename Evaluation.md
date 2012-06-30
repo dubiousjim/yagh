@@ -34,7 +34,7 @@ But as we muddle over those questions, let's start exploring what constraints th
 
 I created a test Mercurial repository that you can clone from <https://code.google.com/p/yagh-test/>. This is a small repository displaying a variety of features: it has several named branches, one of them "inactive" and another with multiple heads. There are also some bookmarks already in the upstream repository, and some committed tags. Here is how it looks on my machine, you may see different revision numbers. (I did myself, after cloning it a few times.)
 
-<pre> 
+
                     + all this is branch3  +-- r17 "latest" <= tip
                     |                     /
                     \==>     +- r13 <- r14 <-- r16 mark3
@@ -48,7 +48,7 @@ I created a test Mercurial repository that you can clone from <https://code.goog
                                           r9
                                            \
                                             r10 <= branch1
-</pre> 
+
 
 The tags, bookmarks, and branches are as labeled. The "latest" and "head1" labels aren't any of those; they're just what the commit messages on r15 and r17 say.
 

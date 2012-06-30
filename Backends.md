@@ -4,18 +4,18 @@ Evaluating the Backends
 The Candidates
 --------------
 
-As mentioned in the README, there are a couple of different backend methods one can use to drive a Git/Hg bridge, and then some additional choices one can make about packaging those backends for day-to-day use. (In git-speak, what "porcelain" to install on top of them.)
+As mentioned in the [README](https://github.com/dubiousjim/yagh/blob/master/README.md), there are a couple of different backend methods one can use to drive a Git/Hg bridge, and then some additional choices one can make about packaging those backends for day-to-day use. (In git-speak, what "porcelain" to install on top of them.)
 
 Before we sort out our frontend choices, though, we've got to settle which backend engines work best. Here are the options.
 
 1. `git fast-import` is a component in the standard Git distribution that imports text-serialized repositories. There is another component `git fast-export` that serializes Git repositories to the needed format; but what we need is a way to serialize *Mercurial* repositories into that format. Someone has in fact made that; it's available as the `hg-fast-export` scripts (`hg-fast-export.py`, `hg-fast-export.sh`, and `hg2git.py`) that are in the [fast-export project](http://repo.or.cz/w/fast-export.git). (That project also has some `hg-reset` scripts that I don't yet understand; and also some scripts for interacting with Subversion.)
 
-    So these `hg-fast-export` scripts provide a way to serialize a Mercurial repository, and we can pipe the result into `git fast-import`. That's one way to go from hg->git. It's what the `git-hg` script uses.
+    So these `hg-fast-export` scripts provide a way to serialize a Mercurial repository, and we can pipe the result into `git fast-import`. That's one way to go from hg->git. It's what the `git-hg` tool uses.
 
 
-2. How about the reverse direction, from git->hg? One way to do this is with the [convert extension](http://mercurial.selenic.com/wiki/ConvertExtension) for Mercurial (see also [here](http://www.selenic.com/mercurial/hg.1.html#convert)). This again is what the `git-hg` script uses. The `convert` extension already comes with the standard Mercurial distribution, though it's not enabled by default. No problem, though: whatever frontend porcelain we build can just explicitly enable it for the Mercurial repos we use.
+2. How about the reverse direction, from git->hg? One way to do this is with the [convert extension](http://mercurial.selenic.com/wiki/ConvertExtension) for Mercurial (see also [here](http://www.selenic.com/mercurial/hg.1.html#convert)). This again is what the `git-hg` tool uses. The `convert` extension already comes with the standard Mercurial distribution, though it's not enabled by default. No problem, though: whatever frontend porcelain we build can just explicitly enable it for the Mercurial repos we use.
     
-    This extension is able to keep track of conversions that it has already made into a Mercurial repository, so that later conversions can be incremental. However, as we'll see below, there are severe limits to how well this works when we combine it with hg->git exports going in the other direction.
+    This extension is able to keep track of conversions that it has already made into a Mercurial repository, so that later conversions can be incremental. However, as we'll see below, there are severe limits to how well this works when we combine it with hg->git movement between the same repositories.
 
 
 3. A different Mercurial extension is [hg-git](http://hg-git.github.com/). This *isn't* part of the standard Mercurial distribution, but needs to be installed separately. As with the `convert` extension, our frontend porcelain can take care of enabling this extension in the repositories where we're going to use it, so the user doesn't need to make it enabled globally. She just needs to have it installed.
@@ -39,7 +39,7 @@ I created a test Mercurial repository that you can clone from <https://code.goog
                     |                     /
                     \==>     +- r13 <- r14 <-- r16 mark3
                             /             \
-               branch2 => r12              +-- r15 "head1"
+    "inactive" branch2 => r12              +-- r15 "head1"
               ends here  /
                        r11 mark2
                        /
@@ -185,7 +185,7 @@ I'll point out two nice things about how this all worked. One is that our tags w
 The other nice thing is that although we got error messages about the unnamed heads, they were still imported into the Git database. Here's a handy Git alias I have in my `~/.gitconfig`:
 
     [alias]
-    lost-commits = !git fsck --unreachable | grep commit | cut -d\\  -f3 | xargs git log --no-walk
+    lost-commits = !git fsck --unreachable | sed -ne 's/^unreachable commit //p' | xargs git log --no-walk              
 
 Using that, we can ask:
 
@@ -207,9 +207,7 @@ Let's try adding another changeset on the Mercurial side and doing the hg->git i
     commit: (clean)
     update: 2 new changesets, 3 branch heads (merge)
 
-    ~/repo/yagh-test1 $ vim data
-
-    ~/repo/yagh-test1 $ hg commit -m "post-latest"
+    ~/repo/yagh-test1 $ vim data && hg commit -m "post-latest"
 
     ~/repo/yagh-test1 $ hg log -l2
     changeset:   18:218b4ab1e286
@@ -228,7 +226,7 @@ Let's try adding another changeset on the Mercurial side and doing the hg->git i
 
     $ cd ~/repo/test1.git
 
-    ~/repo/test1.git $ /usr/local/libexec/yagh/hg-fast-export.sh --force -M master2 -o origin2 -r ~/repo/yagh-test1
+    ~/repo/test1.git $ /usr/local/libexec/yagh/hg-fast-export.sh --force -M master2 -o origin2
     Using last hg repository "/usr/home/jim/repo/yagh-test1"
     Error: repository has at least one unnamed head: hg r16
     Error: repository has at least one unnamed head: hg r15
@@ -250,14 +248,14 @@ Cool, so new commits on the Mercurial side get imported in the way we'd expect.
 
 Besides the need to `--force` if a Mercurial named branch---or the default branch---has multiple heads, the only other downside I see to this *importing* method is that it ignores bookmarks in the Mercurial repository. Depending on how the upstream repositories you want to interact with operate, that may or may not be a problem. The folks behind the `hg-git` extension say that Mercurial bookmarks are conceptually closer to Git branches than Mercurial named branches are. (References to the latter, but not to either of the former, are hard-written into a commit and are difficult to expunge or modify. Also, commits can only belong to one Mercurial named branch at a time.) So they encourage Mercurial/Git integration based on Mercurial bookmarks rather than named branches.
 
-However, if your upstream Mercurial repositories are structured in ways that work well with this import method, then it may suit your needs. I haven't done any performance comparisons versus the `hg-git` methods, but many users do report satisfaction using the [git-hg](https://github.com/cosmin/git-hg) frontend, which as I said is built around this import method.
+However, if your upstream Mercurial repositories are structured in ways that work well with this import method, then it may suit your needs. I haven't done any performance comparisons versus the `hg-git` methods, but many users do report satisfaction using the [git-hg](https://github.com/cosmin/git-hg) frontend tool, which as I said is built around this import method.
 
 The fast-export project does [note some limitations](http://repo.or.cz/w/fast-export.git/blob_plain/HEAD:/hg-fast-export.txt) on the `hg-fast-export` scripts:
 
     hg-fast-export supports multiple branches but only named branches with
     exaclty one head each...
 
-As we saw, their tool complains when a branch has multiple heads. However, `--force`ing the export seemed to work ok. The notes go on:
+As we saw, their scripts complain when a branch has multiple heads. However, `--force`ing the export seemed to work ok. The notes go on:
 
     Otherwise commits to the tip of these heads
     within branch will get flattened into merge commits.
@@ -277,7 +275,7 @@ These things noted, though, this method might still work well for some users who
 Testing Method 2
 ----------------
 
-*However* if you also need to push from Git back to Mercurial, then things aren't so rosy. The natural way to do this is to combine the `hg-fast-export` scripts with the Mercurial `convert` extension. (That's what the `git-hg` frontend does. If one were going to install the `hg-git` extension, one could just use that to go in both directions.)
+*However* if you also need to push from Git back to Mercurial, then things aren't so rosy. The natural way to do this is to combine the `hg-fast-export` scripts with the Mercurial `convert` extension. (That's what the `git-hg` frontend tool does. If one were going to install the `hg-git` extension, one could just use that to go in both directions.)
 
 Let's make a change on the Git side and try to push it back to Mercurial. The `test1.git` repository we created is a bare repository, so we can't modify it directly. Let's just clone it and push a change from the clone back to its origin.
 
@@ -290,11 +288,7 @@ Let's make a change on the Git side and try to push it back to Mercurial. The `t
     # On branch master
     nothing to commit (working directory clean)
 
-    ~/repo/test2 $ vim data
-
-    ~/repo/test2 $ git add data
-
-    ~/repo/test2 $ git commit -m "change from git"
+    ~/repo/test2 $ vim data && git commit -m "change from git" data
     [master 47eab84] change from git
      1 files changed, 1 insertions(+), 0 deletions(-)
 
@@ -1158,7 +1152,7 @@ This is all working pretty well. Let's try adding a commit from the Git side, an
     $ cd ~/test3 && git reset --hard master
     HEAD is now at 9a989e3 to be marked1
 
-    ~/test3 $ vim data && git add data && git commit -m "added in git"
+    ~/test3 $ vim data && git commit -m "added in git" data
     [master 9284712] added in git
      1 files changed, 1 insertions(+), 0 deletions(-)
 
@@ -1169,7 +1163,7 @@ This is all working pretty well. Let's try adding a commit from the Git side, an
     *  [master] added in git
     *+ [mark1] to be marked1
 
-    ~/test3 $ git co mark1
+    ~/test3 $ git checkout mark1
     Switched to branch 'mark1'
 
     ~/test3 $ git merge master
@@ -1178,17 +1172,17 @@ This is all working pretty well. Let's try adding a commit from the Git side, an
      data |    1 +
      1 files changed, 1 insertions(+), 0 deletions(-)
 
-    ~/test3 $ git co -b newbranch master
+    ~/test3 $ git checkout -b newbranch master
     Switched to a new branch 'newbranch'
 
-    ~/test3 $ vim data && git add data && git commit -m "added to newbranch"
+    ~/test3 $ vim data && git commit -m "added to newbranch" data
     [newbranch d56a467] added to newbranch
      1 files changed, 1 insertions(+), 0 deletions(-)
 
-    ~/test3 $ git co master
+    ~/test3 $ git checkout master
     Switched to branch 'master'
 
-    ~/test3 $ vim data && git add data && git commit -m "added more to master"
+    ~/test3 $ vim data && git commit -m "added more to master" data
     [master bf55acc] added more to master
      1 files changed, 1 insertions(+), 0 deletions(-)
 
@@ -1226,7 +1220,7 @@ This all seems to be working as expected. The only awkwardness I see is that the
 
 The `hg-git` seems to dislike pushing to the Git `master` branch, even if we update the `master` bookmark on the Mercurial side:
 
-    ~/repo/yagh-test3 $ hg up -C master
+    ~/repo/yagh-test3 $ hg checkout -C master
     0 files updated, 0 files merged, 0 files removed, 0 files unresolved
 
     ~/repo/yagh-test3 $ vim data && hg commit -m "advance master"   
@@ -1248,7 +1242,7 @@ The `hg-git` seems to dislike pushing to the Git `master` branch, even if we upd
 
 but that's just because we had the `master` branch checked out. If we instead check out some other branch, we can push to master just fine:
 
-    $ cd ~/test3 && git co mark1 && cd ~/repo/yagh-test3 && hg push
+    $ cd ~/test3 && git checkout mark1 && cd ~/repo/yagh-test3 && hg push
     Switched to branch 'mark1'
     pushing to /home/jim/repo/test3
     creating and sending data

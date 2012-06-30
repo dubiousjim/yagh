@@ -4,7 +4,7 @@ Evaluation
 The Backend Candidates
 ----------------------
 
-As mentioned above, there are a couple of different backend methods one can use to drive a Git/Mercurial bridge, and then some additional choices one can make about packaging those backends for day-to-day use. (In git-speak, what "porcelain" to install on top of them.)
+As mentioned above, there are a couple of different backend methods one can use to drive a Git/Hg bridge, and then some additional choices one can make about packaging those backends for day-to-day use. (In git-speak, what "porcelain" to install on top of them.)
 
 Before we sort out our frontend choices, though, we've got to settle which backend engines work best. Here are the options.
 
@@ -408,7 +408,7 @@ Yeah, the "change from git" showed up alright, as r34 (umm...r34? ...yeah, hold 
 
 There are those high revision numbers again. What's going on with that? We started off with a repository with 19 changesets (the 0..17 we cloned plus the "post-latest" one we added). Then we added one on the Git side. So we should now have 20 changesets. Instead we have 37. It looks like all of the reachable old Git commits (all the ancestors of the named heads in Mercurial) have been duplicated in the Mercurial repository. This is unacceptable.
 
-Maybe there's some way to clean this all up and get it to work. I don't know. But on the face of it, this method just looks terribly unsuited to play the role of an ongoing git->hg bridge. Of course, that's not its intended purpose: it's *meant* for importing Git commits that the destination Mercurial repository had never seen, for example, if we were converting the Git repository into an empty Mercurial repository. But it initially looked like it might do what we need for an ongoing back-and-forth bridge. That's in fact how the `git-hg` tool uses it. But it doesn't work! We can't be polluting our Mercurial repository with all these duplicate commits everytime we push. Not to mention that our Git-created commits are descended in the history from the new copies of the old commits, rather than from the originals, as we intended.
+Maybe there's some way to clean this all up and get it to work. I don't know. But on the face of it, this method just looks terribly unsuited to play the role of an ongoing Git/Hg bridge. Of course, that's not its intended purpose: it's *meant* for importing Git commits that the destination Mercurial repository had never seen, for example, if we were converting the Git repository into an empty Mercurial repository. But it initially looked like it might do what we need for an ongoing back-and-forth bridge. That's in fact how the `git-hg` tool uses it. But it doesn't work! We can't be polluting our Mercurial repository with all these duplicate commits everytime we push. Not to mention that our Git-created commits are descended in the history from the new copies of the old commits, rather than from the originals, as we intended.
 
 The `convert` extension has a configuration setting `convert.hg.usebranchnames` that defaults to `true`. So far as I can tell, turning that off has no effect if you continue to specify a `--branchmap` file. I tried repeating everything we did before without the `-M` and `-o` flags to `hg-fast-export`, and without the branchmap file, but still end up getting the same duplicated commits when we `convert` the Git repository back into Mercurial.
 

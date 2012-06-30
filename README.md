@@ -1,5 +1,5 @@
-yagh: Yet Another set of Git to Hg interfaces
-=============================================
+yagh: Yet Another (set of) Git to Hg bridge(s)
+==============================================
 
 I want to use Git to interact with upstream Mercurial repositories. Surely I thought someone else must have already hashed this out. So I looked into what tools were available.
 
@@ -25,11 +25,11 @@ You might also like to read the accompanying [Evaluation page](https://github.co
 
 ## Installation ##
 
-I think these different Git-Hg bridges can work under Windows, too, but I don't know much about that, and will continue on the assumption you're trying to install to some Unix-like system.
+I think these different Git/Hg bridges can work under Windows, too, but I don't know much about that, and will continue on the assumption you're trying to install to some Unix-like system.
 
 You'll need to have Git and Mercurial already installed. I'll leave that to you.
 
-If you plan to use either git-hg-again or git-remote-hg, you'll need to have the Hg-Git Mercurial extension installed. Perhaps your distribution already packages this. If not, you might install it by typing `easy_install hg-git`. Or see the 
+If you plan to use either `git-hg-again` or `git-remote-hg`, you'll need to have the `hg-git` Mercurial extension installed. Perhaps your distribution already packages this. If not, you might install it by typing `easy_install hg-git`. Or see the 
 [hg-git homepage](http://hg-git.github.com/) for more information. You may see references to including some of the following in your `~/.hgrc`:
 
     [extensions]

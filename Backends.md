@@ -586,9 +586,9 @@ And:
 
 There is one more relevant part of the documentation, discussing `gimport` and `gexport`; but we'll reserve that for later.
 
-Other parts of the documentation discuss installation; we'll defer that until our general installation instructions below.
+Other parts of the documentation discuss installation; we discuss that in the installation instructions in the [README](https://github.com/dubiousjim/yagh/blob/master/README.md).
 
-Ok, here are the tidbits I extract out of all of that:
+Here are some tidbits I extract out of the preceding:
 
   * pulling from Git will add local Mercurial tags `default/branchname` for each Git branch
   * *cloning* from Git will create a bookmark for each Git branch
@@ -596,19 +596,19 @@ Ok, here are the tidbits I extract out of all of that:
 
 We'll have to check and see whether pulling also creates new bookmarks for Git branches that have no Mercurial correlate. The documentation seems to imply it won't.
 
-For the time being, we'll ignore the issues about Mercurial bookmarks and named branches possibly having the same names.
+For the time being, we'll ignore worries about Mercurial bookmarks and named branches possibly having the same names.
 
 With regard to pushing:
 
-* pushing to a Git repo with branches will push Mercurial bookmarks and tags to Git branches with the same name, so long as these are fast-forward pushes
+  * pushing to a Git repo with branches will push Mercurial bookmarks and tags to Git branches with the same name, so long as these are "fast-forward" pushes
 
 Is it only local Mercurial tags that are so handled? That's what the documentation seems to imply. Are global Mercurial tags exported to Git at all? (We'll see below: yes, they are.)
 
-* new Git branches will be created for each Mercurial bookmark that doesn't yet have a matching Git branch
+  * new Git branches will be created for each Mercurial bookmark that doesn't yet have a matching Git branch
 
 Finally:
 
-* when there are no Mercurial bookmarks, the Mercurial `tip` is pushed into Git `master`
+  * when there are no Mercurial bookmarks, the Mercurial `tip` is pushed into Git `master`
 
 The documentation implies this only happens when the Git repository is empty. But what if we then push a second time: is `tip` no longer pushed? And when there are Mercurial bookmarks, is `tip` just ignored? We'll have to check and see.
 
@@ -618,7 +618,7 @@ Also, one part of the documentation seems to contradict the last item: it says t
 Testing Method 3
 ----------------
 
-Ok, let's try this out. We'll start over with a new clone of the upstream repository:
+Let's try this all out. We'll start over with a new clone of the upstream repository:
 
     $ cd ~/repo && hg clone https://code.google.com/p/yagh-test/ yagh-test3
     requesting all changes
@@ -655,11 +655,11 @@ We're going to want some additional copies of this as we proceed, so let's make 
 
 Let's delete bookmark `mark3` and replace it with a local tag:
 
-    ~/repo/yagh-test4 $ hg bookmark --delete mark3 && hg tag --local -r16 mark3
+    ~/repo/yagh-test4 $ hg bookmark --delete mark3 && hg tag --local -r16 local3
 
     ~/repo/yagh-test4 $ hg tags -v
     tip                               17:aad9ea416809
-    mark3                             16:f409556ae260 local
+    local3                            16:f409556ae260 local
     tag2                               4:54a73ff52ed4
     tag1                               1:d03e4e8a14b0
 
@@ -682,11 +682,11 @@ In this version we won't have any bookmarks:
 
     ~/repo/yagh-test5 $ hg bookmark --delete mark2
 
-But we still have `mark3` as a local tag:
+But we still have `local3` as a local tag:
 
     ~/repo/yagh-test5 $ hg tags -v
     tip                               17:aad9ea416809
-    mark3                             16:f409556ae260 local
+    local3                            16:f409556ae260 local
     tag2                               4:54a73ff52ed4
     tag1                               1:d03e4e8a14b0
 
@@ -726,7 +726,7 @@ Whoops. What happened?
     ./.git/hooks
     ./.git/branches
 
-It looks like a bunch of Mercurial commits were copied over, but when `hg-git` tried to fast-forward the `master` branch, it failed. That's because this was a fresh Git repository and the `master` ref hadn't yet been created. Let's start over with that reference in place:
+It looks like a bunch of Mercurial commits were copied over, but when `hg-git` tried to "fast-forward" the `master` branch, it failed. That's because this was a fresh Git repository and the `master` ref hadn't yet been created. Let's start over with that reference in place:
 
     $ cd ~/repo && rm -rf test5 && cp -a test{3,5} && cd test5
 
@@ -827,7 +827,7 @@ Pushing a second time works fine. However, how much of our Mercurial tree was pu
 
 It looks like everything past `tag2` wasn't pushed. However, once we we start adding revisions to `default` branch, then its head will be tagged (with `tip`), and perhaps we'd *then* get the rest of it pushed over to Git. Even if that works, though, it's looking like more and more trouble to use `hg-git` without Mercurial bookmarks.
 
-OK, let's create a new commit on the Mercurial side and push it. We have to be sure we do this on the default branch, since as I said, that's the only branch that `hg-git` is pushing (in this mode of operation).
+Let's create a new commit on the Mercurial side and push it. We have to be sure we do this on the default branch, since as I said, that's the only branch that `hg-git` is pushing (in this mode of operation).
 
     ~/repo/yagh-test6 $ hg checkout -r8
     0 files updated, 0 files merged, 0 files removed, 0 files unresolved
@@ -866,7 +866,7 @@ That doesn't look good.
 
     ~/repo/yagh-test6 $ hg tags -v
     tip                               18:e1c4d4ffeba8
-    mark3                             16:f409556ae260 local
+    local3                            16:f409556ae260 local
     tag2                               4:54a73ff52ed4
     default/master                     4:54a73ff52ed4
     tag1                               1:d03e4e8a14b0
@@ -878,7 +878,7 @@ That doesn't look good.
 
     ~/repo/yagh-test6 $ hg tags -v
     tip                               18:e1c4d4ffeba8
-    mark3                             16:f409556ae260 local
+    local3                            16:f409556ae260 local
     tag2                               4:54a73ff52ed4
     default/master                     4:54a73ff52ed4 local
     tag1                               1:d03e4e8a14b0
@@ -886,13 +886,13 @@ That doesn't look good.
 Hey, it didn't update. It's still at r4. That's because the `default/master` tag is managed by the `hg-git` extension, not by the ordinary tags mechanism. Well, let's clean up our `.hg/localtags` file and try something else:
 
     ~/repo/yagh-test6 $ vim .hg/localtags && cat .hg/localtags
-    f409556ae260823778413762e93f7aa6e6d16ad5 mark3
+    f409556ae260823778413762e93f7aa6e6d16ad5 local3
 
     ~/repo/yagh-test6 $ hg tag --local -rtip master && hg tag --local -rtip newbranch && hg tags -v
     tip                               18:e1c4d4ffeba8
     master                            18:e1c4d4ffeba8 local
     newbranch                         18:e1c4d4ffeba8 local
-    mark3                             16:f409556ae260 local
+    local3                            16:f409556ae260 local
     tag2                               4:54a73ff52ed4
     default/master                     4:54a73ff52ed4
     tag1                               1:d03e4e8a14b0
@@ -919,7 +919,7 @@ OK, let's go back to yagh-test4, then. To remind ourselves, this has both some b
 
     ~/repo/yagh-test4 $ hg tags -v
     tip                               17:aad9ea416809
-    mark3                             16:f409556ae260 local
+    local3                            16:f409556ae260 local
     tag2                               4:54a73ff52ed4
     tag1                               1:d03e4e8a14b0
 
@@ -949,9 +949,9 @@ Let's see if pushing works:
 Everything got transferred over except revisions 8-10, and revisions 12-17 in our Mercurial repository:
 
     
-                    + all this is branch3  +-- r17 "latest" <= tip
-                    |                     /
-                    \==>     +- r13 <- r14 <-- r16 mark3
+                                           +-- r17 "latest" <= tip
+                                          /
+             branch3 ==>     +- r13 <- r14 <-- r16 local3
                             /             \
                branch2 => r12              +-- r15 "head1"
               ends here  /
@@ -964,7 +964,7 @@ Everything got transferred over except revisions 8-10, and revisions 12-17 in ou
                                             r10 <= branch1
     
 
-And those are just the revisions that are ahead of any bookmark. If you'll recall, the `hg-git` documentation said that it would also transfer over local tags, but we observe here that `mark3`, which we've converted to a local tag, and the chain leading up to it, were not transferred.
+And those are just the revisions that are ahead of any bookmark. If you'll recall, the `hg-git` documentation said that it would also transfer over local tags, but we observe here that our tag `local3`, and the chain leading up to it, were not transferred.
 
 Hence it looks like you've really got to rely on bookmarks to control what gets pushed.
 
@@ -1035,20 +1035,19 @@ Now let's see if pushing works:
 This pushed everything except revisions 8 and 15.
 
     
-                    + all this is branch3  +--  .  "latest" <= tip, also branch3_bookmark
-                    |                     /
-                    \==>     +-  .  <-  .  <--  .  mark3
+                                           +--  .  "latest" <= tip, also branch3_bookmark
+                                          /
+             branch3 ==>     +-  .  <-  .  <--  .  mark3
                             /             \
                branch2 =>  .               +-- r15 "head1"
               ends here  /
-    also branch2_book....  mark2
+                        .  mark2
                        /
      . <-  . <-  . <-  . <-  . <-  . <-  . <-  . <- r8 <= default branch
          tag1              tag2          \   mark1
                                           . 
                                            \
-                                            .   <= branch1
-                                                   also branch1_bookmark
+                                            .   <= branch1, also branch1_bookmark
     
 
 And that makes sense, because r8 and r15 are exactly the revisions beyond any of our bookmarks. (We haven't marked the tip of the default branch with a bookmark, I suppose we should do that, too.)

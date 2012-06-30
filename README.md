@@ -20,7 +20,7 @@ I saw some ways to usefully tweak the different frontends---in some cases, these
 
 Details on installing and using (the yagh versions of) these tools are below.
 
-You might also like to read the accompanying Evaluation.md page, which gives the different backend and frontend choices a work-out and figures out what works best.
+You might also like to read the accompanying [Evaluation page](https://github.com/dubiousjim/yagh/blob/master/Evaluation.md), which gives the different backend and frontend choices a work-out and figures out what works best.
 
 
 ## Installation ##

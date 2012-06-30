@@ -4,7 +4,7 @@ Evaluation
 The Backend Candidates
 ----------------------
 
-As mentioned above, there are a couple of different backend methods one can use to drive a Git/Hg bridge, and then some additional choices one can make about packaging those backends for day-to-day use. (In git-speak, what "porcelain" to install on top of them.)
+As mentioned in the README, there are a couple of different backend methods one can use to drive a Git/Hg bridge, and then some additional choices one can make about packaging those backends for day-to-day use. (In git-speak, what "porcelain" to install on top of them.)
 
 Before we sort out our frontend choices, though, we've got to settle which backend engines work best. Here are the options.
 

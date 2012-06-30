@@ -422,7 +422,7 @@ The `convert` extension comes with a flag `--rev` that permits you to specify wh
 
 Perhaps we could do something like that (only using an existing Mercurial changeset as the parent we splice onto, rather than 0000000000000000000000000000000000000000). But wow, that's a lot more work than we were expecting. And no doubt our initial efforts to get that working will be brittle and break in corner cases that didn't occur to us. Perhaps if there were no alternatives, this is what we'd have to do. But given how difficult this all looks, let's turn instead to the `hg-git` methods.
 
-Lesson learned: **the backend method the `git-hg` tool uses to push from Git to Mercurial is not usable.** That tool does declare this functionality "experimental", but in its current implementation it's just broken. It will double your Mercurial repository every time you pull-then-push, and your new Git commits will not be descendents of any commit already in the database. As I hope the above discussion makes clear, this is not something one can fix with tweaks to the `git-hg` frontend; it's a limitation in the backend implementation that `git-hg` is relying on. So don't use `git-hg` to push to Mercurial; if you're going to use it, use it for pulling only.
+Lesson learned: *the backend method the `git-hg` tool uses to push from Git to Mercurial is not usable.* That tool does declare this functionality "experimental", but in its current implementation it's just broken. It will double your Mercurial repository every time you pull-then-push, and your new Git commits will not be descendents of any commit already in the database. As I hope the above discussion makes clear, this is not something one can fix with tweaks to the `git-hg` frontend; it's a limitation in the backend implementation that `git-hg` is relying on. So don't use `git-hg` to push to Mercurial; if you're going to use it, use it for pulling only.
 
 
 Hg-git documentation
@@ -480,7 +480,9 @@ and that:
     When pushing to git, the following is done to determine what's pushed :
 
       * if there are no bookmarks and the remote repository is empty, the tip is pushed as the master branch.
-      * for each branch in the remote repository, if there is a bookmark or a tag with the same name that points to a descendent of the head, then push it.
+      * for each branch in the remote repository, if there is a bookmark or a
+        tag with the same name that points to a descendent of the head, then
+        push it.
       * if there are bookmarks with no remote branch, a new branch is created. 
 
     The bookmarks extension is not necessary, one can work using solely local tags, but it's more convenient to use it.
@@ -517,9 +519,11 @@ The version of the documentation we were following first continues:
 
         $ hg pull
 
-    That will pull down any commits that have been pushed to the server in the meantime and give you a new head that you can merge in.
+    That will pull down any commits that have been pushed to the server in the
+    meantime and give you a new head that you can merge in.
 
-    Hg-Git can also be used to convert a Mercurial repository to Git. As Dulwich doesn't support local repositories yet...
+    Hg-Git can also be used to convert a Mercurial repository to Git. As
+    Dulwich doesn't support local repositories yet...
 
 We discussed this comment earlier; it seems to be out-of-date. The docs continue:
 
@@ -540,7 +544,8 @@ We discussed this comment earlier; it seems to be out-of-date. The docs continue
         $ cd git-repo
         $ git checkout -b master hg
 
-    To import new changesets into the Git repository just rerun the hg push command and then use git merge or git rebase in your Git repository.
+    To import new changesets into the Git repository just rerun the hg push
+    command and then use git merge or git rebase in your Git repository.
 
 Finally, other parts of the documentation add these details:
 
@@ -949,7 +954,7 @@ Let's see if pushing works:
 
 Everything got transferred over except revisions 8-10, and revisions 12-17 in our Mercurial repository:
 
-<pre> 
+    
                     + all this is branch3  +-- r17 "latest" <= tip
                     |                     /
                     \==>     +- r13 <- r14 <-- r16 mark3
@@ -963,7 +968,7 @@ Everything got transferred over except revisions 8-10, and revisions 12-17 in ou
                                           r9
                                            \
                                             r10 <= branch1
-</pre> 
+    
 
 And those are just the revisions that are ahead of any bookmark. If you'll recall, the `hg-git` documentation said that it would also transfer over local tags, but we observe here that `mark3`, which we've converted to a local tag, and the chain leading up to it, were not transferred.
 
@@ -1035,7 +1040,7 @@ Now let's see if pushing works:
 
 This pushed everything except revisions 8 and 15.
 
-<pre>
+    
                     + all this is branch3  +--  .  "latest" <= tip, also branch3_bookmark
                     |                     /
                     \==>     +-  .  <-  .  <--  .  mark3
@@ -1050,7 +1055,7 @@ This pushed everything except revisions 8 and 15.
                                            \
                                             .   <= branch1
                                                    also branch1_bookmark
-</pre>
+    
 
 And that makes sense, because r8 and r15 are exactly the revisions beyond any of our bookmarks. (We haven't marked the tip of the default branch with a bookmark, I suppose we should do that, too.)
 

@@ -1,0 +1,57 @@
+This patch removes the broken push functionality, tweaks the usage message, and enhances git hg checkout in two ways: (1) fail more cleanly if remote branch doesn't exit, (2) configure the newly-created branch so that it can `git hg pull` from its remote namesake.
+
+
+diff -Naurp third/git-hg fourth/git-hg
+--- third/git-hg	2012-07-01 00:30:45.287603550 -0400
++++ fourth/git-hg	2012-07-01 00:23:03.163805134 -0400
+@@ -176,28 +176,27 @@ git-hg-checkout () {
+         shift
+     fi
+     git-hg-fetch $FORCE
+-    git checkout "hg/$1" -b "$1"
++    if git rev-parse --verify -q "remotes/hg/$1" >/dev/null; then
++        git checkout "hg/$1" -b "$1"
++        git config "hg.tracking.$1" "$1"
++    else
++        echo "ERROR: Remote branch $1 doesn't exist." >&2
++        exit 1
++    fi
+ }
+-git-hg-push () {
+-    HG_REPO=$1
+-    hg --config extensions.convert= convert . .git/hgcheckout
+-    hg -R .git/hgcheckout push "$HG_REPO"
+-}
+-
+ 
+ usage () {
+     echo "To clone a mercurial repo run:"
+-    echo "  clone <path/to/mercurial/repo> [local_checkout_path]"
++    echo "  git hg clone <path/to/mercurial/repo> [local_checkout_path]"
+     echo ""
+     echo " if that fails (due to unnamed heads) try:"
+-    echo "  clone --force <path/to/mercurial/repo> [local_checkout_path]"
++    echo "  git hg clone --force <path/to/mercurial/repo> [local_checkout_path]"
+     echo ""
+     echo "To work with a cloned mercurial repo use: "
+-    echo "  fetch [ --force ]                   fetch latest branches from mercurial"
+-    echo "  pull [ --force ] [ --rebase ]       fetch and merge (or rebase) into the"
+-    echo "                                      current branch"
+-    echo "  push [destination]                  push latest changes to mercurial"
+-    echo "  checkout [ --force ] branch_name    checkout a mercurial branch"
++    echo "  git hg fetch [ --force ]                   fetch latest branches from mercurial"
++    echo "  git hg pull [ --force ] [ --rebase ]       fetch and merge (or rebase) into the"
++    echo "                                             current branch"
++    echo "  git hg checkout [ --force ] branch_name    checkout a mercurial branch"
+ }
+ 
+ FORCE=
+@@ -205,7 +204,7 @@ REBASE=
+ CMD=$1
+ shift
+ case "$CMD" in
+-    clone|fetch|pull|checkout|push)
++    clone|fetch|pull|checkout)
+         git-hg-$CMD "$@"
+         ;;
+     *)

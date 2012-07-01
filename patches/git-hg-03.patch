@@ -1,0 +1,57 @@
+This patch permits specifying the name of the Git branch kept in sunch with the Hg tip. If left blank, it will default to "master" as before.
+
+
+
+diff -Naurp second/git-hg third/git-hg
+--- second/git-hg	2012-07-01 00:23:03.174807021 -0400
++++ third/git-hg	2012-07-01 00:23:03.180806387 -0400
+@@ -1,5 +1,6 @@
+ #!/bin/sh
+ 
++MASTER=default
+ 
+ if which python2 >/dev/null 2>&1; then
+     PYTHON=python2
+@@ -89,12 +90,13 @@ git-hg-clone () {
+         git init --bare .git/hgremote
+         (
+             cd .git/hgremote
+-            "$HG_FAST_EXPORT" -r ../hgcheckout $FORCE
++            "$HG_FAST_EXPORT" ${MASTER:+-M "$MASTER"} -r ../hgcheckout $FORCE
+         )
+         git remote add hg .git/hgremote
+         git fetch hg
+-        if git rev-parse --verify -q remotes/hg/master >/dev/null; then
+-            local branch="master"
++        local m=${MASTER:-master}
++        if git rev-parse --verify -q "remotes/hg/$m" >/dev/null; then
++            local branch=$m
+         else
+             local branch=$(cd .git/hgcheckout/ && hg tip | awk '/^branch:/ {print $2; exit}')
+         fi
+@@ -112,7 +114,7 @@ git-hg-fetch () {
+     hg -R .git/hgcheckout pull
+     (
+         cd .git/hgremote
+-        "$HG_FAST_EXPORT" $FORCE
++        "$HG_FAST_EXPORT" ${MASTER:+-M "$MASTER"} $FORCE
+     )
+     git fetch hg
+ }
+@@ -143,11 +145,12 @@ git-hg-pull () {
+         remote_branch=$(git config hg.tracking.master || true)
+ 
+         if [ -z "$remote_branch" ]; then
+-            if git rev-parse --verify -q remotes/hg/master >/dev/null; then
+-                remote_branch="master"
+-                git config hg.tracking.master master
++            local m=${MASTER:-master}
++            if git rev-parse --verify -q "remotes/hg/$m" >/dev/null; then
++                remote_branch=$m
++                git config hg.tracking.master "$m"
+             else
+-                echo "ERROR: Cannot determine remote branch. There is no remote branch called master, and hg.tracking.master not set. Merge the desired branch manually." >&2
++                echo "ERROR: Cannot determine remote branch. There is no remote branch called $m, and hg.tracking.master not set. Merge the desired branch manually." >&2
+                 exit 1
+             fi
+         fi

@@ -1,0 +1,32 @@
+Some modestly more aggressive, but still shell-scripting-focused, changes.
+
+diff -Naurp first/git-hg second/git-hg
+--- first/git-hg	2012-07-01 00:23:03.155805793 -0400
++++ second/git-hg	2012-07-01 00:23:03.174807021 -0400
+@@ -28,7 +28,7 @@ canonicalize () {
+     
+     while [ -L "$path" ]; do
+         dir=$(dirname "$path")
+-        path=$(ls -l "$path" | sed -e 's/.* -> //')
++        path=${$(ls -l "$path")#* -> }
+         cd "$dir"
+     done
+     
+@@ -98,7 +96,7 @@ git-hg-clone () {
+         if git rev-parse --verify -q remotes/hg/master >/dev/null; then
+             local branch="master"
+         else
+-            local branch=$(cd .git/hgcheckout/ && hg tip | grep branch | awk '{print $2}')
++            local branch=$(cd .git/hgcheckout/ && hg tip | awk '/^branch:/ {print $2; exit}')
+         fi
+         git config hg.tracking.master "$branch"
+         git pull hg "$branch"
+@@ -143,7 +141,7 @@ git-hg-pull () {
+ 
+     if [ "master" = "$current_branch" ]; then
+         remote_branch=$(git config hg.tracking.master || true)
+-        
++
+         if [ -z "$remote_branch" ]; then
+             if git rev-parse --verify -q remotes/hg/master >/dev/null; then
+                 remote_branch="master"

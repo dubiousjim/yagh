@@ -120,16 +120,22 @@ Branches from the Mercurial repository will be visible in Git as remote tracking
     hg/default
     hg/branch1
 
-To keep up to date afterwards:
-
-    git hg fetch [--force]
-    git hg pull [--force] [--rebase]
-
-This tool doesn't provide reliable push support.
-
 To checkout a new local branch following one of the remote branches, use:
 
     git hg checkout [--force] branch1
+
+After that branch has been created, it can be checked out again later using the ordinary `git checkout`. When checked out, it can be brought up-to-date with the Mercurial upstream using:
+
+    git hg pull [--force] [--rebase]
+
+or you can use:
+
+    git hg fetch [--force]
+
+and `git merge` or `git rebase` by hand. The same commands are used to bring your `master` branch up-to-date.
+
+This tool doesn't provide reliable push support.
+
 
 
 ## Mercurial for Git Users ##

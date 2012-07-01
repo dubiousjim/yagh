@@ -35,9 +35,9 @@ But as we muddle over those questions, let's start exploring what constraints th
 I created a test Mercurial repository that you can clone from <https://code.google.com/p/yagh-test/>. This is a small repository displaying a variety of features: it has several named branches, one of them "inactive" and another with multiple heads. There are also some bookmarks already in the upstream repository, and some committed tags. Here is how it looks on my machine, you may see different revision numbers. (I did myself, after cloning it a few times.)
 
 
-                    + all this is branch3  +-- r17 "latest" <= tip
-                    |                     /
-                    \==>     +- r13 <- r14 <-- r16 mark3
+                                           +-- r17 "latest" <= tip
+           all this is                    /
+             branch3 ==>     +- r13 <- r14 <-- r16 mark3
                             /             \
     "inactive" branch2 => r12              +-- r15 "head1"
               ends here  /
@@ -954,7 +954,7 @@ Everything got transferred over except revisions 8-10, and revisions 12-17 in ou
              branch3 ==>     +- r13 <- r14 <-- r16 local3
                             /             \
                branch2 => r12              +-- r15 "head1"
-              ends here  /
+                         /
                         .  mark2
                        /
      . <-  . <-  . <-  . <-  . <-  . <-  . <-  . <- r8 <= default branch
@@ -1040,7 +1040,7 @@ This pushed everything except revisions 8 and 15.
              branch3 ==>     +-  .  <-  .  <--  .  mark3
                             /             \
                branch2 =>  .               +-- r15 "head1"
-              ends here  /
+                         /
                         .  mark2
                        /
      . <-  . <-  . <-  . <-  . <-  . <-  . <-  . <- r8 <= default branch

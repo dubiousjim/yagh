@@ -97,8 +97,9 @@ def main(argv=None, git_dir=None):
     """
     if argv is None:
         argv = sys.argv
+    env = os.environ
     if git_dir is None:
-        git_dir = os.environ.get("GIT_DIR", None)
+        git_dir = env.get("GIT_DIR", None)
     if git_dir is None:
         git_dir = os.getcwd()
         if os.path.exists(os.path.join(git_dir, ".git")):
@@ -134,14 +135,18 @@ def main(argv=None, git_dir=None):
             msg = "git-remote-http failed with error code %d" % (retcode,)
             raise RemoteHGError(msg)
 
-        # check whether we need to complete any initialization
-        hg_checkout.finish_initialization()
+        if "GIT_PREFIX" in env:
+            #  FIXME: We don't interpret the incoming hg-remote-helper stream to determine push/pull.
+            if env.get("GIT_REFLOG_ACTION", "push") == "pull":
+                pass
+            else:
+                #  If git-remote-http worked OK, push any changes up to the remote URL.
+                hg_checkout.push()
+        else:
+            # cloning
+            # check whether we need to complete any initialization
+            hg_checkout.finish_initialization()
 
-        #  If git-remote-http worked OK, push any changes up to the remote URL.
-        #  Do it unconditionally for now, so we don't have to interpret
-        #  the incoming hg-remote-helper stream to determine push/pull.
-        #  FIXME: this is inefficient.
-        hg_checkout.push()
     finally:
         #  Make sure we tear down the HTTP server before quitting.
         backend.stop()

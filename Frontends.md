@@ -49,7 +49,7 @@ Recall the test Mercurial repository we were working with in the Backends discus
                                           r9
                                            \
                                             r10 <= branch1
-
+<!-->
 
 We can list the branches and bookmarks that come from upstream like this:
 
@@ -110,10 +110,15 @@ Additionally, the global tags from upstream will be visible in our clone, and wi
 
 Neither will we do anything special to coordinate the `.gitignore` and `.hgignore` files. If these are checked in and pushed to the hidden Git repository, they'll be tracked in Mercurial and Git like any other file. You can synchronize them by hand when needed.
 
-Finally, the `hg-git` extension will also create a set of `default/*` tags that it maintains in our local Mercurial repository. We'll just ignore these. The end-user should ideally not need to go poking around in that Mercurial repository on her own, and these tags won't be pushed upstream.
+Finally, the `hg-git` extension may also create a set of `default/*` tags that it maintains in our local Mercurial repository. We'll just ignore these. The end-user should ideally not need to go poking around in that Mercurial repository on her own, and these tags won't be pushed upstream.
+
+That will be our design for `git-remote-hg`.
 
 
-That will be our design for `git-remote-hg`. For `git-hg`, we can implement something similar, where we get:
+git-hg
+------
+
+For `git-hg`, we can implement something similar, where we get:
 
     Mercurial   Mercurial              Working Remote-Tracking
     Branches    Bookmarks              Git Branches
@@ -126,24 +131,11 @@ That will be our design for `git-remote-hg`. For `git-hg`, we can implement some
                 mark2
                 mark3
 
-One difference here is that we'll only be implementing *pulling* from Mercurial into Git with this tool. Secondly, bookmarks aren't imported; only Mercurial branches and tags. In the same way we've configured `git-remote-hg`, this tool also makes use of a second, hidden Git repository, which is exposed to the working Git repository as a remote named "hg".
-
-To fetch or pull from those branches, one uses the following commands:
-
-    git hg clone [--force] url [dir]
-    git hg fetch [--force]
-    git hg pull [--force] [--rebase]
-    git hg checkout [--force] branchname
-
-An example of using the last command would be:
-
-    git hg checkout branch2
-
-This will create a new branch named `branch2` in the working Git repository, that tracks the remote `hg/branch2` branch which is synchronized with the upstream Mercurial. If there already exists a local branch `branch2`, the command will fail. After `branch2` has been created, it can be checked out again later using the ordinary `git checkout`. When checked out, it can be brought up-to-date with the Mercurial upstream using:
-
-    git hg pull [--force] [--rebase]
+One difference here is that we'll only be implementing *pulling* from Mercurial into Git with this tool. Secondly, bookmarks aren't imported; only Mercurial branches and tags. In the same way we've configured `git-remote-hg`, this tool also makes use of a second, hidden Git repository, which is exposed to the working Git repository as a remote named `hg`.
 
 
+git-hg-again
+------------
 
 For the `git-hg-again` tool, we'll follow its existing basic design. I'll just add a few refinements.
 
@@ -154,3 +146,4 @@ This tool will create a Mercurial bookmark that it will keep in synch with the t
 I'll summarize the changes I made to `git-hg-again` some other time; for now, just see the yagh gitlog
 
 
+# vim: ft=markdown

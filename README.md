@@ -44,6 +44,8 @@ Concerning the installation of `hg-git`, you may see references to including som
 
 The `bookmarks` line isn't necessary anymore; that's been built into the Mercurial core since version 1.8, released 1 March 2011. The `hggit` line can be included in your `~/.hgrc` if you like; but the versions of these tools that are distributed with yagh will also specify that in the individual repositories, so you really don't need to bother with it.
 
+To use `git-remote-hg`, the upstream Mercurial server you're interacting with needs to support bookmarks. So it either needs to be version `>=` 1.8, or it needs to have the bookmarks extension enabled.
+
 Finally, type *one of* the following:
 
     gmake && sudo gmake install-git-hg-again
@@ -70,6 +72,46 @@ That depends on which tool you're using. I've tried to make the versions package
 
 *Note that these instructions apply to these tools as configured in yagh, which differ in several ways from how the original authors distribute them.*
 
+### Using git-remote-hg ###
+
+To clone from an upstream Mercurial repository:
+
+    git clone hg::url [localdir]
+
+Bookmarks and branches in the Mercurial repository will be visible in Git as remote tracking branches of the form:
+
+    hg/default
+    hg/branch1
+    hg/bookmark1
+
+To keep up to date:
+
+    git fetch [hg]
+    git pull [--rebase] [hg]
+    git push
+
+These are just the plain `git fetch` commands. You can omit the `hg` if you're in a branch that tracks part of the upstream Mercurial repository. Your `master` branch is initially set up to do so.
+
+To push "new branches" into the Mercurial repository, do this:
+
+    git push hg local_git_branch:new_hg_branch
+    git branch --set-upstream local_git_branch hg/new_hg_branch
+
+If you want the branch to be named the same on both ends, you can just use `branch_name` instead of `branch_name:branch_name`. (But you still need to call `git branch --set-upstream ...`) Note that what these commands will do is push a new Mercurial *bookmark* upstream; when you push and pull, that bookmark will be kept in synch with the head of your Git branch. The actual named branch used on the Mercurial side will be whatever was the named branch of the bookmark's ancestors.
+
+If you want to delete a Mercurial branch, you can try this:
+
+    git push hg :hg_branch_to_delete
+
+Note though that this will only delete the "branches" that are implemented as Mercurial bookmarks. Those that correspond to named branches in the Mercurial repository will be automatically re-created in your `hg` Git remote the next time you pull. You don't have to base any local Git branches on them, if you want to ignore them.
+
+This tool permits the use of *multiple* Mercurial remotes for a given Git repository. Just specify the ones after the first by:
+
+    git remote add [-t branch] [--tags] remotename hg::url
+
+Then you can `git fetch remotename` and so on as usual.
+
+
 ### Using git-hg-again ###
 
 To clone from an upstream Mercurial repository:
@@ -86,26 +128,6 @@ To keep up to date afterwards:
 
 from the master branch.???
 
-
-### Using git-remote-hg ###
-
-To clone from an upstream Mercurial repository:
-
-    git clone hg::url [localdir]
-
-Bookmarks and branches in the Mercurial repository will be visible in Git as remote tracking branches of the form:
-
-    hg/default
-    hg/branch1
-    hg/bookmark1
-
-To keep up to date:
-
-    git fetch
-    git pull [--rebase]
-    git push
-
-Note that with this tool, it's just plain `git fetch`, not `git hg fetch`.
 
 ### Using git-hg ###
 
@@ -124,7 +146,7 @@ To checkout a new local branch following one of the remote branches, use:
 
     git hg checkout [--force] branch1
 
-After that branch has been created, it can be checked out again later using the ordinary `git checkout`. When checked out, it can be brought up-to-date with the Mercurial upstream using:
+This will create a new branch named `branch1` in your working Git repository, that tracks the remote `hg/branch1` branch which is synchronized with upstream Mercurial. If there already exists a local branch `branch1`, the command will fail. After `branch1` has been created, it can be checked out again later using the ordinary `git checkout`. When checked out, it can be brought up-to-date with the Mercurial upstream using:
 
     git hg pull [--force] [--rebase]
 
@@ -134,8 +156,7 @@ or you can use:
 
 and `git merge` or `git rebase` by hand. The same commands are used to bring your `master` branch up-to-date.
 
-This tool doesn't provide reliable push support.
-
+This tool doesn't provide good push support.
 
 
 ## Mercurial for Git Users ##
@@ -156,4 +177,3 @@ Here are some useful comparisons/translation manuals between Git and Mercurial, 
 Dubiousjim  
 dubiousjim@gmail.com  
 https://github.com/dubiousjim  
-

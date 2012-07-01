@@ -696,7 +696,7 @@ We'll make another copy for later:
 
 OK, now let's try pushing these to our fresh Git repositories and see what happens. We'll start by pushing yagh-test5 into test5:
 
-    ~/repo/yagh-test5 $ hg push
+    $ cd ~/repo/yagh-test5 && hg push
     pushing to /usr/home/jim/repo/test5
     exporting hg objects to git
     creating and sending data
@@ -791,7 +791,7 @@ We just can't see them because the `master` ref we created doesn't have any comm
 
 Well, we could fix this by forcing the master ref to point to the latest of the Mercurial commits:
 
-    ~/repo/test5 $ git reset --hard 2b9279f
+    ~/repo/test5 $ git reset 2b9279f
     HEAD is now at 2b9279f to be tagged2
 
 Then we can leave the "initial git commit" to be GC'd. In hindsight, maybe we could have just cleaned up after the failed `hg push` from yagh-test5 in the same way. And in fact that does bring us to roughly this same point; except in that case, we have a `master` bookmark created on the Mercurial side pointing to the Mercurial `tip`. And that could mess up later pushes, since the `tip` needn't be on the default branch, which is the only branch `hg-git` is pushing over.
@@ -1148,7 +1148,8 @@ These `default/*` tags aren't stored in *either* `.hgtags` *or* in `.hg/localtag
 
 This is all working pretty well. Let's try adding a commit from the Git side, and pulling it back into Mercurial.
 
-    $ cd ~/test3 && git reset --hard master
+    $ cd ~/test3 && git checkout master && git reset --hard
+    Already on 'master'
     HEAD is now at 9a989e3 to be marked1
 
     ~/test3 $ vim data && git commit -m "added in git" data
@@ -1215,7 +1216,7 @@ The `hg-git`-managed tags were updated as well:
     default/mark1                     20:6bdb2775b948
     ...[output pruned]...
 
-This all seems to be working as expected. The only awkwardness I see is that these bookmarks and `hg-git`-managed tags seem to overlap in functionality. Also, all of our Git repository is getting pulled in; there's no division between local and hg-tracking branches. But these are things a frontend porcelain can take care of.
+This all seems to be working as expected. The only awkwardness I see is that the bookmarks and `hg-git`-managed tags overlap some in functionality. Also, all of our Git repository is getting pulled in; there's no division between working and hg-tracking branches. But these are things a frontend porcelain can take care of.
 
 The `hg-git` seems to dislike pushing to the Git `master` branch, even if we update the `master` bookmark on the Mercurial side:
 
@@ -1260,6 +1261,7 @@ but that's just because we had the `master` branch checked out. If we instead ch
     83feef0 advance master
     bf55acc added more to master
 
+Again, this is something our frontend porcelain can guard against.
 
 Testing Method 4
 ----------------
@@ -1302,7 +1304,6 @@ Here is [the relevant part of the `hg-git` documentation](http://mercurial.selen
     This will cause 'hg gexport' to update the 'from-hg' branch, instead of the
     master branch, so that your changes will not be lost even if you work on the
     master branch.
-
 
 I went through all of the steps from the preceding section with yagh-test5, yagh-test4, and so on, substituting `hg gexport` for `hg push` and `hg gimport` for `hg pull`. Here is what the `.hg/hgrc` file I used:
 

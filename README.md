@@ -64,7 +64,7 @@ If you want to uninstall all this stuff, type:
 See [the git logs](https://github.com/dubiousjim/yagh/commits/master). I will inform the upstream authors of the changes that seemed useful, and will try to keep track of other changes they make to the originals. I'll be glad to hear about cases where any of these tools break.
 
 
-## How does one use these tools? How do they work? ##
+## How does one use these tools? ##
 
 That depends on which tool you're using. I've tried to make the versions packaged here behave as close to each other as possible, but they're still not exactly the same.
 

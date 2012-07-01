@@ -199,7 +199,10 @@ class HgGitCheckout(object):
     def pull(self):
         """Grab any changes from the remote repository."""
         hg_repo_dir = self.hg_repo_dir
-        self._do("hg", "pull", cwd=hg_repo_dir)
+        in_marks = ["-B"+b.split()[0] for b in
+                self._get("hg", "incoming", "-Bq", cwd=hg_repo_dir, returncodes=(0,1))]
+        # hg pulling with in_marks
+        self._do("hg", "pull", *in_marks, cwd=hg_repo_dir)
         for branch in self._get("hg", "branches", "--active", "-q", cwd=hg_repo_dir):
             # this handles the default branch too
             self._do("hg", "bookmark", "-fr", branch, branch+"_branchtracker", cwd=hg_repo_dir)
@@ -212,7 +215,11 @@ class HgGitCheckout(object):
 
         # TODO: is this incremental? or should we `hg pull` with an explicit path?
         self._do("hg", "gimport", cwd=hg_repo_dir)
-        self._do("hg", "push", cwd=hg_repo_dir)
+        out_marks = [b.split()[0] for b in
+            self._get("hg", "outgoing", "-Bq", cwd=hg_repo_dir, returncodes=(0,1))]
+        out_marks = ["-B"+b for b in out_marks if not b.endswith('_branchtracker')]
+        # hg pushing with out_marks
+        self._do("hg", "push", *out_marks, cwd=hg_repo_dir)
 
     def initialize_hg_repo(self):
         hg_repo_dir = self.hg_repo_dir

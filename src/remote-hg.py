@@ -200,12 +200,17 @@ class HgGitCheckout(object):
         """Grab any changes from the remote repository."""
         hg_repo_dir = self.hg_repo_dir
         self._do("hg", "pull", cwd=hg_repo_dir)
-        self._do("hg", "bookmark", "-fr", "default", "master", cwd=hg_repo_dir)
+        for branch in self._get("hg", "branches", "--active", "-q", cwd=hg_repo_dir):
+            # this handles the default branch too
+            self._do("hg", "bookmark", "-fr", branch, branch+"_branchtracker", cwd=hg_repo_dir)
+        # TODO: is this incremental? or should we `hg push` with an explicit path?
         self._do("hg", "gexport", cwd=hg_repo_dir)
 
     def push(self):
         """Push any changes into the remote repository."""
         hg_repo_dir = self.hg_repo_dir
+
+        # TODO: is this incremental? or should we `hg pull` with an explicit path?
         self._do("hg", "gimport", cwd=hg_repo_dir)
         self._do("hg", "push", cwd=hg_repo_dir)
 
@@ -225,8 +230,12 @@ class HgGitCheckout(object):
             f.write(dedent("""
             [extensions]
             hggit = 
+            [git]
+            branch_bookmark_suffix = _branchtracker
             """))
-        self._do("hg", "bookmark", "-r", "default", "master", cwd=hg_repo_dir)
+            for branch in self._get("hg", "branches", "--active", "-q", cwd=hg_repo_dir):
+                # this handles the default branch too
+                self._do("hg", "bookmark", "-r", branch, branch+"_branchtracker", cwd=hg_repo_dir)
         self._do("hg", "gexport", cwd=hg_repo_dir)
         with open(os.path.join(self.git_repo_dir, "HEAD"), "wt") as f:
             f.write("ref: refs/heads/default\n")

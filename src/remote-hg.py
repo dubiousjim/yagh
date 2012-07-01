@@ -131,6 +131,9 @@ def main(argv=None, git_dir=None):
             msg = "git-remote-http failed with error code %d" % (retcode,)
             raise RuntimeError(msg)
 
+        # check whether we need to complete any initialization
+        hg_checkout.finish_initialization()
+
         #  If git-remote-http worked OK, push any changes up to the remote URL.
         #  Do it unconditionally for now, so we don't have to interpret
         #  the incoming hg-remote-helper stream to determine push/pull.
@@ -155,6 +158,10 @@ class HgGitCheckout(object):
         self.hg_name = hg_name = urllib.quote(hg_url, safe="")
         self.hg_repo_dir = os.path.join(git_dir, "hgremotes", hg_name)
         self.git_repo_dir = os.path.join(self.hg_repo_dir, ".hg", "git")
+        if not os.path.exists(os.path.join(git_dir, "hgremotes")):
+            self.git_dir = git_dir
+        else:
+            self.git_dir = False
         if not os.path.exists(self.hg_repo_dir):
             self.initialize_hg_repo()
 
@@ -203,7 +210,19 @@ class HgGitCheckout(object):
             """))
         self._do("hg", "bookmark", "-r", "default", "master", cwd=hg_repo_dir)
         self._do("hg", "gexport", cwd=hg_repo_dir)
+        with open(os.path.join(self.git_repo_dir, "HEAD"), "wt") as f:
+            f.write("ref: refs/heads/default\n")
 
+    def finish_initialization(self):
+        git_dir = self.git_dir
+        if git_dir:
+            self._do("git", "branch", "-m", "default", "master", cwd=git_dir)
+            self._do("git", "remote", "rename", "origin", "hg", cwd=git_dir)
+            with open(os.path.join(git_dir, "config"), "at") as f:
+                f.write(dedent("""
+                [push]
+                default = upstream
+                """))
 
 class SilentWSGIRequestHandler(wsgiref.simple_server.WSGIRequestHandler):
     """WSGIRequestHandler that doesn't print to stderr for each request."""

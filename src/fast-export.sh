@@ -84,21 +84,21 @@ git-hg-clone () {
         exit 1
     fi
     git init "$CHECKOUT"
-    hg clone -U "$HG_REMOTE" "$CHECKOUT/.git/hgclone"
+    hg clone -U "$HG_REMOTE" "$CHECKOUT/.git/hgremote"
     (
         cd "$CHECKOUT"
-        git init --bare .git/hgclone/.hg/git
+        git init --bare .git/hgremote/.hg/git
         (
-            cd .git/hgclone/.hg/git
+            cd .git/hgremote/.hg/git
             "$HG_FAST_EXPORT" ${MASTER:+-M "$MASTER"} -r ../.. $FORCE
         )
-        git remote add hg .git/hgclone/.hg/git
+        git remote add hg .git/hgremote/.hg/git
         git fetch hg
         local m=${MASTER:-master}
         if git rev-parse --verify -q "remotes/hg/$m" >/dev/null; then
             local branch=$m
         else
-            local branch=$(cd .git/hgclone/ && hg tip | awk '/^branch:/ {print $2; exit}')
+            local branch=$(cd .git/hgremote/ && hg tip | awk '/^branch:/ {print $2; exit}')
         fi
         git config hg.tracking.master "$branch"
         git pull hg "$branch"
@@ -111,9 +111,9 @@ git-hg-fetch () {
         FORCE="--force"
         shift
     fi
-    hg -R .git/hgclone pull
+    hg -R .git/hgremote pull
     (
-        cd .git/hgclone/.hg/git
+        cd .git/hgremote/.hg/git
         "$HG_FAST_EXPORT" ${MASTER:+-M "$MASTER"} $FORCE
     )
     git fetch hg

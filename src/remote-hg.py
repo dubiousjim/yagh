@@ -36,41 +36,24 @@ them together to make it all work a little easier.
 For each remote mercurial repository, you actually get *two* additional
 repositories hidden inside your local git repo:
 
-    * .git/hgcheckout:   a local hg clone of the remote repo
-    * .git/hgremote:     a bare git repo managed by hg-git
+    * .git/hgremotes/[URL]:           a local hg clone of the remote repo
+    * .git/hgremotes/[URL]/.hg/git:   a bare git repo managed by hg-git
 
 When you "git push" from your local git repo into the remote mercurial repo,
 here is what git-remote-hg will do for you:
 
-    * use git-remote-http to push into .git/hgremote
-    * call "hg gimport" to import changes into .git/hgcheckout
+    * use git-remote-http to push into .git/hgremotes/[URL]/.hg/git
+    * call "hg gimport" to import changes into .git/hgremotes/[URL]
     * call "hg push" to push them up to the remote repo
 
 Likewise, when you "git pull" from the remote mercurial repo into your local
 git repo, here is what happens under the hood:
 
     * call "hg pull" to pull changes from the remote repo
-    * call "hg gexport" to export them into .git/hgremote
+    * call "hg gexport" to export them into .git/hgremotes/[URL]/.hg/git
     * use git-remote-http to pull them into your local repo
 
 Ugly?  Sure.  Hacky?  You bet.  But it seems to work remarkably well.
-
-By the way, there is apparently a native implementation of a git-remote-hg
-command in development:
-
-    https://plus.google.com/115991361267198418069/posts/Jpzi24bYU91
-
-Since the git-remote-helper protocol is pretty simple, it should be possible
-to switch back and forth between that implementation and this one without any
-hassle.
-
-WARNINGS:
-
-    * Pushing multiple branches into the remote is currently broken.
-
-      hg-git seems to map git branches onto mercurial bookmarks, but I'm not
-      sure of all the details.  I don't need it so I haven't tried to make it
-      work.  Don't do it.
 
 """
 
@@ -99,7 +82,7 @@ def main(argv=None, git_dir=None):
     will communicate with a remote mercurial repository.  It basically does
     the following:
 
-        * ensure there's a local hg checkout in .git/hgcheckout
+        * ensure there's a local hg checkout in .git/hgremotes/[URL]
         * ensure that it has a matching hg-git repo for import/export
         * update the hg-git repo from the remote mercurial repo
         * start a background thread running git-http-backend to communicate
@@ -123,7 +106,7 @@ def main(argv=None, git_dir=None):
 
     #  Grab the local hg-git checkout, creating it if necessary.
     hg_checkout = HgGitCheckout(git_dir, hg_url)
-    
+
     #  Start git-http-backend to push/pull into the hg-git checkout.
     backend = GitHttpBackend(hg_checkout.git_repo_dir)
     t = backend.start()
@@ -135,6 +118,8 @@ def main(argv=None, git_dir=None):
         #  Grab any updates from the remote repo.
         #  Do it unconditionally for now, so we don't have to interpret
         #  the incoming hg-remote-helper stream to determine push/pull.
+        #  This is also a good idea because it helps us locally detect
+        #  any merge conflicts when trying to `git push`.
         hg_checkout.pull()
 
         #  Use git-remote-http to send all commands to the HTTP server.
@@ -146,12 +131,13 @@ def main(argv=None, git_dir=None):
             msg = "git-remote-http failed with error code %d" % (retcode,)
             raise RuntimeError(msg)
 
-        #  If that worked OK, push any changes up to the remote URL.
+        #  If git-remote-http worked OK, push any changes up to the remote URL.
         #  Do it unconditionally for now, so we don't have to interpret
         #  the incoming hg-remote-helper stream to determine push/pull.
+        #  FIXME: this is inefficient.
         hg_checkout.push()
     finally:
-        #  Make sure we tearn down the HTTP server before quitting.
+        #  Make sure we tear down the HTTP server before quitting.
         backend.stop()
         t.join()
 
@@ -167,13 +153,13 @@ class HgGitCheckout(object):
     def __init__(self, git_dir, hg_url):
         self.hg_url = hg_url
         self.hg_name = hg_name = urllib.quote(hg_url, safe="")
-        self.hg_repo_dir = os.path.join(git_dir, "hgcheckout")
-        self.git_repo_dir = os.path.join(git_dir, "hgremote")
+        self.hg_repo_dir = os.path.join(git_dir, "hgremotes", hg_name)
+        self.git_repo_dir = os.path.join(self.hg_repo_dir, ".hg", "git")
         if not os.path.exists(self.hg_repo_dir):
             self.initialize_hg_repo()
 
     def _do(self, *cmd, **kwds):
-        """Run a hg command, capturing and reporting output."""
+        """Run a hg command, capturing and printing output to stderr."""
         silent = kwds.pop("silent", False)
         kwds["stdout"] = subprocess.PIPE
         kwds["stderr"] = subprocess.STDOUT
@@ -202,6 +188,7 @@ class HgGitCheckout(object):
         hg_repo_dir = self.hg_repo_dir
         if not os.path.isdir(os.path.dirname(hg_repo_dir)):
             os.makedirs(os.path.dirname(hg_repo_dir))
+        # have to clone without -U to create working dir
         self._do("hg", "clone", self.hg_url, hg_repo_dir)
         self._do("hg", "update", "null", cwd=hg_repo_dir, silent=True)
         with open(os.path.join(hg_repo_dir, "README.txt"), "wt") as f:
@@ -216,9 +203,6 @@ class HgGitCheckout(object):
             """))
         self._do("hg", "bookmark", "-r", "default", "master", cwd=hg_repo_dir)
         self._do("hg", "gexport", cwd=hg_repo_dir)
-        git_dir = os.path.join(self.hg_repo_dir, ".hg", "git")
-        os.rename(git_dir, self.git_repo_dir)
-        os.symlink(self.git_repo_dir, git_dir)
 
 
 class SilentWSGIRequestHandler(wsgiref.simple_server.WSGIRequestHandler):

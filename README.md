@@ -97,13 +97,17 @@ To push "new branches" into the Mercurial repository, do this:
     git push hg local_git_branch:new_hg_branch
     git branch --set-upstream local_git_branch hg/new_hg_branch
 
-If you want the branch to be named the same on both ends, you can just use `branch_name` instead of `branch_name:branch_name`. (But you still need to call `git branch --set-upstream ...`) Note that what these commands will do is push a new Mercurial *bookmark* upstream; when you push and pull, that bookmark will be kept in synch with the head of your Git branch. The actual named branch used on the Mercurial side will be whatever was the named branch of the bookmark's ancestors.
+If you want the branch to be named the same on both ends, you can just use `branch_name` instead of `branch_name:branch_name`. (But you still need to call `git branch --set-upstream ...`) Note that what these commands will do is push a new Mercurial *bookmark* upstream; when you push and pull, that bookmark will be kept in synch with the head of your Git branch.
+
+All of your Git commits will belong to the `default` branch in Mercurial, even if they're on a Git branch that you based on a named Mercurial branch. This means that you may be pushing multiple unmerged heads upstream, one for each of the Git branches you push changes on. Hopefully the maintainers and other users of the upstream repository will be OK with that.
+
+Our frontend will try to keep the `hg/default` branch (which your `master` branch pulls from) in synch with the Mercurial commits that no other Git branch/Mercurial bookmark is tracking.
 
 If you want to delete a Mercurial branch, you can try this:
 
     git push hg :hg_branch_to_delete
 
-Note though that this will only delete the "branches" that are implemented as Mercurial bookmarks. Those that correspond to named branches in the Mercurial repository will be automatically re-created in your `hg` Git remote the next time you pull. You don't have to base any local Git branches on them, if you want to ignore them.
+Note though that this will only delete the "branches" that are implemented as Mercurial bookmarks. Those that correspond to named branches in the Mercurial repository will be automatically re-created in your `hg` Git remote the next time you pull. If you want to ignore them, just don't base any local Git branches on them.
 
 This tool permits the use of *multiple* Mercurial remotes for a given Git repository. Just specify the ones after the first by:
 

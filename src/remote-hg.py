@@ -165,9 +165,25 @@ class HgGitCheckout(object):
         if not os.path.exists(self.hg_repo_dir):
             self.initialize_hg_repo()
 
+    def _get(self, *cmd, **kwds):
+        """Run a hg command, capturing and returning output."""
+        silent = kwds.pop("silent", False)
+        returncodes = kwds.pop("returncodes", (0,))
+        kwds["stdout"] = subprocess.PIPE
+        kwds["stderr"] = subprocess.STDOUT
+        p = subprocess.Popen(cmd, **kwds)
+        (out, err) = p.communicate()
+        if err or p.returncode not in returncodes:
+            if err:
+                print>>sys.stderr, "hg: " + err.strip()
+            msg = "%s %s failed with error code %d" % (cmd[0], cmd[1], p.returncode)
+            raise RuntimeError(msg)
+        return out.splitlines()
+
     def _do(self, *cmd, **kwds):
         """Run a hg command, capturing and printing output to stderr."""
         silent = kwds.pop("silent", False)
+        returncodes = kwds.pop("returncodes", (0,))
         kwds["stdout"] = subprocess.PIPE
         kwds["stderr"] = subprocess.STDOUT
         p = subprocess.Popen(cmd, **kwds)
@@ -176,7 +192,9 @@ class HgGitCheckout(object):
             if not silent:
                 print>>sys.stderr, "hg: " + output.strip()
             output = p.stdout.readline()
-        p.wait()
+        if p.wait() not in returncodes:
+            msg = "%s %s failed with error code %d" % (cmd[0], cmd[1], p.returncode)
+            raise RuntimeError(msg)
 
     def pull(self):
         """Grab any changes from the remote repository."""

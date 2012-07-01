@@ -213,11 +213,25 @@ class HgGitCheckout(object):
         """Push any changes into the remote repository."""
         hg_repo_dir = self.hg_repo_dir
 
+        hg_marks = set(b[:-14] if b.endswith("_branchtracker") else b
+                for b in
+                self._get("hg", "bookmarks", "-q", cwd=hg_repo_dir))
+        git_branches = set(b[2:] for b in
+                self._get("git", "--git-dir=.", "branch", cwd=self.git_repo_dir))
+        deleted = hg_marks - git_branches
+        for b in deleted:
+            self._do("hg", "bookmark", "-d", b, cwd=hg_repo_dir)
+        # created = git_branches - hg_marks
+
         # TODO: is this incremental? or should we `hg pull` with an explicit path?
         self._do("hg", "gimport", cwd=hg_repo_dir)
         out_marks = [b.split()[0] for b in
             self._get("hg", "outgoing", "-Bq", cwd=hg_repo_dir, returncodes=(0,1))]
         out_marks = ["-B"+b for b in out_marks if not b.endswith('_branchtracker')]
+        if deleted:
+            in_marks = set(b.split()[0] for b in
+                    self._get("hg", "incoming", "-Bq", cwd=hg_repo_dir, returncodes=(0,1)))
+            out_marks += ["-B"+b for b in deleted if b in in_marks]
         # hg pushing with out_marks
         self._do("hg", "push", *out_marks, cwd=hg_repo_dir)
 

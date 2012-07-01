@@ -115,6 +115,8 @@ This tool permits the use of *multiple* Mercurial remotes for a given Git reposi
 
 Then you can `git fetch remotename` and so on as usual.
 
+Global tags from Mercurial upstream will be pulled into Git annotated tags, but won't be pushed back in the other direction. Additionally, no attempt is made to coordinate `.gitignore` and `.hgignore`.
+
 
 ### Using git-hg-again ###
 

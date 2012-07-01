@@ -74,6 +74,9 @@ import urllib
 import wsgiref.simple_server
 from textwrap import dedent
 
+class RemoteHGError(RuntimeError):
+    pass
+
 
 def main(argv=None, git_dir=None):
     """Main entry-point for the git-remote-hg script.
@@ -129,7 +132,7 @@ def main(argv=None, git_dir=None):
         #  TODO: what are valid return codes?  Seems to be almost always 1.
         if retcode not in (0, 1):
             msg = "git-remote-http failed with error code %d" % (retcode,)
-            raise RuntimeError(msg)
+            raise RemoteHGError(msg)
 
         # check whether we need to complete any initialization
         hg_checkout.finish_initialization()
@@ -177,7 +180,7 @@ class HgGitCheckout(object):
             if err:
                 print>>sys.stderr, "hg: " + err.strip()
             msg = "%s %s failed with error code %d" % (cmd[0], cmd[1], p.returncode)
-            raise RuntimeError(msg)
+            raise RemoteHGError(msg)
         return out.splitlines()
 
     def _do(self, *cmd, **kwds):
@@ -194,7 +197,7 @@ class HgGitCheckout(object):
             output = p.stdout.readline()
         if p.wait() not in returncodes:
             msg = "%s %s failed with error code %d" % (cmd[0], cmd[1], p.returncode)
-            raise RuntimeError(msg)
+            raise RemoteHGError(msg)
 
     def pull(self):
         """Grab any changes from the remote repository."""
@@ -206,15 +209,12 @@ class HgGitCheckout(object):
         for branch in self._get("hg", "branches", "--active", "-q", cwd=hg_repo_dir):
             # this handles the default branch too
             self._do("hg", "bookmark", "-fr", branch, branch+"_branchtracker", cwd=hg_repo_dir)
-        # TODO: is this incremental? or should we `hg push` with an explicit path?
         self._do("hg", "gexport", cwd=hg_repo_dir)
 
     def push(self):
         """Push any changes into the remote repository."""
         hg_repo_dir = self.hg_repo_dir
-
-        hg_marks = set(b[:-14] if b.endswith("_branchtracker") else b
-                for b in
+        hg_marks = set(b[:-14] if b.endswith("_branchtracker") else b for b in
                 self._get("hg", "bookmarks", "-q", cwd=hg_repo_dir))
         git_branches = set(b[2:] for b in
                 self._get("git", "--git-dir=.", "branch", cwd=self.git_repo_dir))
@@ -222,8 +222,6 @@ class HgGitCheckout(object):
         for b in deleted:
             self._do("hg", "bookmark", "-d", b, cwd=hg_repo_dir)
         # created = git_branches - hg_marks
-
-        # TODO: is this incremental? or should we `hg pull` with an explicit path?
         self._do("hg", "gimport", cwd=hg_repo_dir)
         out_marks = [b.split()[0] for b in
             self._get("hg", "outgoing", "-Bq", cwd=hg_repo_dir, returncodes=(0,1))]
@@ -356,6 +354,10 @@ if __name__ == "__main__":
     import sys
     try:
         res = main()
+    except RemoteHGError, msg:
+        print>>sys.stderr, msg
+        print>>sys.stderr
+        res = 1
     except KeyboardInterrupt:
         res = 1
     sys.exit(res)

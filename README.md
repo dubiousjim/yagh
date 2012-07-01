@@ -34,14 +34,15 @@ I think these different Git/Hg bridges can work under Windows, too, but I don't 
 
 You'll need to have Git and Mercurial already installed. I'll leave that to you.
 
-If you plan to use either `git-hg-again` or `git-remote-hg`, you'll need to have the `hg-git` Mercurial extension installed. Perhaps your distribution already packages this. If not, you might install it by typing `easy_install hg-git`. Or see the 
-[hg-git homepage](http://hg-git.github.com/) for more information. You may see references to including some of the following in your `~/.hgrc`:
+If you plan to use either `git-hg-again` or `git-remote-hg`, you'll need to have the `hg-git` Mercurial extension installed. Perhaps your distribution already packages this. If not, you might install it by typing `easy_install hg-git`. Or see the [hg-git homepage](http://hg-git.github.com/) for more information.
+
+Concerning the installation of `hg-git`, you may see references to including some of the following in your `~/.hgrc`:
 
     [extensions]
     hggit = 
     bookmarks =
 
-The `bookmarks` line isn't necessary anymore; that's been built into Mercurial since version 1.8, released 1 March 2011. The `hggit` line can be included in your `~/.hgrc` if you like; but the versions of these tools that are distributed with yagh will also specify that in the individual repositories, so you really don't need to bother with it.
+The `bookmarks` line isn't necessary anymore; that's been built into the Mercurial core since version 1.8, released 1 March 2011. The `hggit` line can be included in your `~/.hgrc` if you like; but the versions of these tools that are distributed with yagh will also specify that in the individual repositories, so you really don't need to bother with it.
 
 Finally, type *one of* the following:
 
@@ -69,8 +70,66 @@ That depends on which tool you're using. I've tried to make the versions package
 
 *Note that these instructions apply to these tools as configured in yagh, which differ in several ways from how the original authors distribute them.*
 
+### Using git-hg-again ###
 
-WORKING ON THESE INSTRUCTIONS...
+To clone from an upstream Mercurial repository:
+
+    git hg clone url [localdir]
+
+This will create a local Git branch `hg/default`, that your `master` branch will descend from.
+
+To keep up to date afterwards:
+
+    git hg fetch
+    git hg pull [--rebase]
+    git hg push
+
+from the master branch.???
+
+
+### Using git-remote-hg ###
+
+To clone from an upstream Mercurial repository:
+
+    git clone hg::url [localdir]
+
+Bookmarks and branches in the Mercurial repository will be visible in Git as remote tracking branches of the form:
+
+    hg/default
+    hg/branch1
+    hg/bookmark1
+
+To keep up to date:
+
+    git fetch
+    git pull [--rebase]
+    git push
+
+Note that with this tool, it's just plain `git fetch`, not `git hg fetch`.
+
+### Using git-hg ###
+
+To clone from an upstream Mercurial repository:
+
+    git hg clone [--force] url [localdir]
+
+The `--force` will be needed if the repository has multiple heads on a branch.
+
+Branches from the Mercurial repository will be visible in Git as remote tracking branches of the form:
+
+    hg/default
+    hg/branch1
+
+To keep up to date afterwards:
+
+    git hg fetch [--force]
+    git hg pull [--force] [--rebase]
+
+This tool doesn't provide reliable push support.
+
+To checkout a new local branch following one of the remote branches, use:
+
+    git hg checkout [--force] branch1
 
 
 ## Mercurial for Git Users ##

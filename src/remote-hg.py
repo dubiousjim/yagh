@@ -204,11 +204,16 @@ class HgGitCheckout(object):
         hg_repo_dir = self.hg_repo_dir
         in_marks = ["-B"+b.split()[0] for b in
                 self._get("hg", "incoming", "-Bq", cwd=hg_repo_dir, returncodes=(0,1))]
+        default_old = int(self._get("hg", "identify", "-nr", "default", cwd=hg_repo_dir)[0])
         # hg pulling with in_marks
         self._do("hg", "pull", *in_marks, cwd=hg_repo_dir)
         for branch in self._get("hg", "branches", "--active", "-q", cwd=hg_repo_dir):
-            # this handles the default branch too
-            self._do("hg", "bookmark", "-fr", branch, branch+"_branchtracker", cwd=hg_repo_dir)
+            if branch <> "default":
+                self._do("hg", "bookmark", "-fr", branch, branch+"_branchtracker", cwd=hg_repo_dir)
+        # advance default?
+        default_new = int(self._get("hg", "identify", "-nr", "default", cwd=hg_repo_dir)[0])
+        if default_new > default_old:
+            self._do("hg", "bookmark", "-fr", "default", "default_branchtracker", cwd=hg_repo_dir)
         self._do("hg", "gexport", cwd=hg_repo_dir)
 
     def push(self):
@@ -223,6 +228,9 @@ class HgGitCheckout(object):
             self._do("hg", "bookmark", "-d", b, cwd=hg_repo_dir)
         # created = git_branches - hg_marks
         self._do("hg", "gimport", cwd=hg_repo_dir)
+        # we advance default unless another bookmark points to tip
+        if not self._get("hg", "log", "-r", "default", "--template={bookmarks}", cwd=hg_repo_dir):
+            self._do("hg", "bookmark", "-fr", "default", "default_branchtracker", cwd=hg_repo_dir)
         out_marks = [b.split()[0] for b in
             self._get("hg", "outgoing", "-Bq", cwd=hg_repo_dir, returncodes=(0,1))]
         out_marks = ["-B"+b for b in out_marks if not b.endswith('_branchtracker')]
@@ -230,8 +238,8 @@ class HgGitCheckout(object):
             in_marks = set(b.split()[0] for b in
                     self._get("hg", "incoming", "-Bq", cwd=hg_repo_dir, returncodes=(0,1)))
             out_marks += ["-B"+b for b in deleted if b in in_marks]
-        # hg pushing with out_marks
-        self._do("hg", "push", *out_marks, cwd=hg_repo_dir)
+        # we have to push -f whenever we've created new heads
+        self._do("hg", "push", "-f", *out_marks, cwd=hg_repo_dir)
 
     def initialize_hg_repo(self):
         hg_repo_dir = self.hg_repo_dir

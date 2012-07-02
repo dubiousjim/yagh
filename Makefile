@@ -32,7 +32,7 @@ install-git-hg-again: install
 	$(INSTALL) -d $(DESTDIR)$(LIBEXECDIR)/git-core
 	$(RM) -f $(DESTDIR)$(LIBEXECDIR)/git-core/git-hg
 	$(RM) -f $(DESTDIR)$(LIBEXECDIR)/git-core/git-remote-hg
-	$(LN) -s $(LIBEXECDIR)/yagh/fast-export.sh $(DESTDIR)$(LIBEXECDIR)/git-core/git-hg
+	$(LN) -s $(LIBEXECDIR)/yagh/again.py $(DESTDIR)$(LIBEXECDIR)/git-core/git-hg
 
 install-git-remote-hg: install
 	$(INSTALL) -d $(DESTDIR)$(LIBEXECDIR)/git-core

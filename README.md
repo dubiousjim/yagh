@@ -44,7 +44,7 @@ Concerning the installation of `hg-git`, you may see references to including som
 
 The `bookmarks` line isn't necessary anymore; that's been built into the Mercurial core since version 1.8, released 1 March 2011. The `hggit` line can be included in your `~/.hgrc` if you like; but the versions of these tools that are distributed with yagh will also specify that in the individual repositories, so you really don't need to bother with it.
 
-To use `git-remote-hg`, the upstream Mercurial server you're interacting with needs to support bookmarks. So it either needs to be version `>=` 1.8, or it needs to have the bookmarks extension enabled.
+To use the version of `git-remote-hg` that I'm supplying here, the upstream Mercurial server you're interacting with needs to support bookmarks. So it either needs to be version `>=` 1.8, or it needs to have the older `bookmarks` extension enabled.
 
 Finally, type *one of* the following:
 

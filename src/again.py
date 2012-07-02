@@ -6,7 +6,7 @@
   git hg clone hg://blah/repository [localdir]
   git hg push
   git hg fetch
-  git hg pull
+  git hg pull [--rebase]
 
 
 Refs:
@@ -21,10 +21,13 @@ import sys
 # TODO: when running a command, ensure the Hg bookmark plugin is active and
 #       installed
 
-def clone(url, *localdir):
+def clone(url, *args):
     """This makes an hg clone and makes that appear as a Git repository."""
-    if localdir:
-        subdir = localdir[0]
+    if len(args) > 1:
+        print >>sys.stderr, "git hg clone: don't understand arguments '%s'" % (" ".join(args[1:]),)
+        return 1
+    if args:
+        subdir = args[0]
     else:
         subdir = os.path.basename(url) or os.path.basename(url[:-1])
     q = os.system("hg clone -U %s %s" % (url,subdir))
@@ -47,12 +50,15 @@ git reset --hard
 """ % subdir)
     return q
 
-def push():
+def push(*args):
     """Pushes back to the Hg repository.
 
     Like ``git push``, but up to the remote Mercurial repo.
 
     """
+    if args:
+        print >>sys.stderr, "git hg push: don't understand arguments '%s'" % (" ".join(args),)
+        return 1
     q = os.system("hg gimport")
     if not q:
         q = os.system("hg bookmark -f hg/default -r default")
@@ -64,7 +70,7 @@ def push():
             q = os.system("hg push")
     return q
 
-def fetch():
+def fetch(*args):
     """Update the local branches with what is up on the remote Mercurial repo.
 
     Equivalent to ``git fetch`` in Git.
@@ -72,6 +78,9 @@ def fetch():
     This updates the Git branches to point to the Mercurial ones.
 
     """
+    if args:
+        print >>sys.stderr, "git hg fetch: don't understand arguments '%s'" % (" ".join(args),)
+        return 1
     q = os.system("hg pull")
     if not q:
         q = os.system("hg bookmark -f hg/default -r default")
@@ -79,15 +88,21 @@ def fetch():
             q = os.system("hg gexport")
     return q
 
-def pull():
+def pull(*args):
     """Fetch and merge the remote changes to the Hg repo.
 
     Equivalent to ``git pull`` in Git.
 
     """
+    if args and args != ('--rebase',):
+        print >>sys.stderr, "git hg pull: don't understand arguments '%s'" % (" ".join(args),)
+        return 1
     q = fetch()
     if not q:
-        q = os.system("git merge hg/default")
+        if args:
+            q = os.system("git rebase default")
+        else:
+            q = os.system("git merge default")
     return q
 
 

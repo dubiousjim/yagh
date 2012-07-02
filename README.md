@@ -154,15 +154,13 @@ To clone from an upstream Mercurial repository:
 
     git hg clone url [localdir]
 
-This will create a local Git branch `hg/default`, that your `master` branch will descend from.
+This will create a local Git branch `default`, that your `master` branch will track and be based on. You can also commit directly to `default`.
 
 To keep up to date afterwards:
 
     git hg fetch
     git hg pull [--rebase]
     git hg push
-
-from the master branch.???
 
 
 ## Mercurial for Git Users ##

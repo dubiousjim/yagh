@@ -139,11 +139,9 @@ git-hg-again
 
 For the `git-hg-again` tool, we'll follow its existing basic design. I'll just add a few refinements.
 
-Note that although this tool creates a Git branch `hg/default`, that is a *local* Git branch that you can read and write to, not a remote tracking branch for some remote `hg`. When you're using this tool, there *is no* remote `hg` repository. We just use the name `hg/default` for memorability.
+This tool creates a Git branch `default`, that tracks the tip of development on the `default` Mercurial branch. This is a *local* Git branch that you can read and write to. It also creates a `master` Git branch, which is based on and tracks the `default` branch. (So you can `git pull` from `master` to merge in changes in `default`.)
 
 This tool will create a Mercurial bookmark that it will keep in synch with the tip of the default branch. If there are other Mercurial bookmarks imported from upstream, these will be converted to Git branches too, since this tool is just relying on the standard operations of the `hg-git` extension. If you have to deal with any such complications, you're probably better off using the `git-remote-hg` tool, which is less brittle. In many cases, you could probably get `git-hg-again` to work, but you'll need to know what you're doing. I think `git-remote-hg` is a bit more idiot-proof, and permits you to get away with thinking about Mercurial less. This is all a matter of degree, though.
-
-I'll summarize the changes I made to `git-hg-again` some other time; for now, just see the yagh gitlog
 
 
 <!-- vim: ft=markdown -->

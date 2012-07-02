@@ -49,7 +49,7 @@ Recall the test Mercurial repository we were working with in the Backends discus
                                           r9
                                            \
                                             r10 <= branch1
-<!-->
+<!-- -->
 
 We can list the branches and bookmarks that come from upstream like this:
 

@@ -118,23 +118,6 @@ Then you can `git fetch remotename` and so on as usual.
 Global tags from Mercurial upstream will be pulled into Git annotated tags, but won't be pushed back in the other direction. Additionally, no attempt is made to coordinate `.gitignore` and `.hgignore`.
 
 
-### Using git-hg-again ###
-
-To clone from an upstream Mercurial repository:
-
-    git hg clone url [localdir]
-
-This will create a local Git branch `hg/default`, that your `master` branch will descend from.
-
-To keep up to date afterwards:
-
-    git hg fetch
-    git hg pull [--rebase]
-    git hg push
-
-from the master branch.???
-
-
 ### Using git-hg ###
 
 To clone from an upstream Mercurial repository:
@@ -163,6 +146,23 @@ or you can use:
 and `git merge` or `git rebase` by hand. The same commands are used to bring your `master` branch up-to-date.
 
 This tool doesn't provide good push support.
+
+
+### Using git-hg-again ###
+
+To clone from an upstream Mercurial repository:
+
+    git hg clone url [localdir]
+
+This will create a local Git branch `hg/default`, that your `master` branch will descend from.
+
+To keep up to date afterwards:
+
+    git hg fetch
+    git hg pull [--rebase]
+    git hg push
+
+from the master branch.???
 
 
 ## Mercurial for Git Users ##

@@ -1335,4 +1335,4 @@ OK, so the `hg-git` extension seems to work pretty well. We just have to make su
 
 For more discussion about how to  best fit a nice frontend porcelain onto the `hg-git` extension, see the accompanying [Frontends page](https://github.com/dubiousjim/yagh/blob/master/Frontends.md).
 
-# vim: ft=markdown
+<!-- vim: ft=markdown -->

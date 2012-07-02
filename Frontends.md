@@ -146,4 +146,4 @@ This tool will create a Mercurial bookmark that it will keep in synch with the t
 I'll summarize the changes I made to `git-hg-again` some other time; for now, just see the yagh gitlog
 
 
-# vim: ft=markdown
+<!-- vim: ft=markdown -->

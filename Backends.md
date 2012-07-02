@@ -48,7 +48,7 @@ I created a test Mercurial repository that you can clone from <https://code.goog
                                           r9
                                            \
                                             r10 <= branch1
-<!-->
+<!-- -->
 
 
 The tags, bookmarks, and branches are as labeled. The "latest" and "head1" labels aren't any of those; they're just what the commit messages on r15 and r17 say.
@@ -964,7 +964,7 @@ Everything got transferred over except revisions 8-10, and revisions 12-17 in ou
                                            \
                                             r10 <= branch1
     
-<!-->
+<!-- -->
 
 And those are just the revisions that are ahead of any bookmark. If you'll recall, the `hg-git` documentation said that it would also transfer over local tags, but we observe here that our tag `local3`, and the chain leading up to it, were not transferred.
 
@@ -1051,7 +1051,7 @@ This pushed everything except revisions 8 and 15.
                                            \
                                             .   <= branch1, also branch1_bookmark
     
-<!-->
+<!-- -->
 
 And that makes sense, because r8 and r15 are exactly the revisions beyond any of our bookmarks. (We haven't marked the tip of the default branch with a bookmark, I suppose we should do that, too.)
 

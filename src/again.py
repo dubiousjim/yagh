@@ -4,9 +4,9 @@
 """Git-hg is a bi-directional interface to Mercurial, like git-svn, but for Hg.
 
   git hg clone hg://blah/repository [localdir]
-  git hg push
   git hg fetch
   git hg pull [--rebase]
+  git hg push
 
 
 Refs:
@@ -34,17 +34,18 @@ def clone(url, *args):
     if not q:
         q = os.system("""
 cd %s && \
-hg update && \
-hg bookmark hg/default -r default && \
+hg bookmark default_branchtracker -r default && \
 echo "^\\.git" >> .hg/hgignore && \
-echo "[git]
+echo "[extensions]
+hggit =
+[git]
 intree = true
-exportbranch = refs/head/hg/default
+branch_bookmark_suffix = _branchtracker
 [ui]
 ignore = .hg/hgignore" >> .hg/hgrc && \
 hg gexport && \
 echo '.hg' >> .git/info/exclude && \
-git branch --track master hg/default && \
+git branch --track master default && \
 git config core.bare false && \
 git reset --hard
 """ % subdir)
@@ -61,11 +62,11 @@ def push(*args):
         return 1
     q = os.system("hg gimport")
     if not q:
-        q = os.system("hg bookmark -f hg/default -r default")
+        q = os.system("hg bookmark -f default_branchtracker -r default")
         if not q:
             q = os.system("hg gexport")
     if not q:
-        res = raw_input("Import Git commits into Hg local repo. Push back to the Hg remote? ")
+        res = raw_input("Imported Git commits into Hg local clone. Push back to the Hg remote? ")
         if res.lower() in ('y', 'yes', '1', 'true'):
             q = os.system("hg push")
     return q
@@ -83,7 +84,7 @@ def fetch(*args):
         return 1
     q = os.system("hg pull")
     if not q:
-        q = os.system("hg bookmark -f hg/default -r default")
+        q = os.system("hg bookmark -f default_branchtracker -r default")
         if not q:
             q = os.system("hg gexport")
     return q

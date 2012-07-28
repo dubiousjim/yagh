@@ -19,6 +19,12 @@ As I describe [at Stack Overflow](http://stackoverflow.com/a/11178693/272427), I
 
 *Don't confuse `hg-git` with `git-hg`!* The first is a Mercurial extension that's a backend to some of these tools, the second is a frontend script that doesn't make any use of the first.
 
+**Update**: Recently, I learned of
+[**another project called git-remote-hg**](https://github.com/msysgit/msysgit/wiki/Guide-to-git-remote-hg).
+Unlike the version listed above, this one doesn't rely on hg-git, but instead
+directly accesses the Mercurial Python API. At the moment, using it also
+requires a patched version of git. I haven't tried this yet.
+
 I wasn't sure which of these tools would work best, so I tried out all three. None of them are yet packaged or documented in a friendly way, but they're not very complicated either. The underlying machinery they make use of (the `hg-git` extension, the `git-remote-helpers` protocol, and the `hg-fast-export` script) are what do the heavy lifting.
 
 I saw some ways to usefully tweak the different frontends---in some cases, these tweaks were necessary to get them to run on the FreeBSD machine I'm currently using---and I also thought it'd help evaluate them to make their behind-the-scenes layout more like each other's. This github repo holds the results. I also included a Makefile that will let you install any of the three. I encourage you to try them out and decide for yourself what works best.
